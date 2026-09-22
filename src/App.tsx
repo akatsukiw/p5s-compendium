@@ -14,6 +14,90 @@ import {
   X,
   Layers,
 } from 'lucide-react';
+import type { MaterialItem } from './types';
+
+/**
+ * Reusable component for rendering Persona Material Badges:
+ * - When requiredLevel > baseLevel, highlights the level badge with P5 signature yellow (#f2c300),
+ *   giving visual alert that this formula requires training the material to a higher level.
+ * - Shows clear hover/title tooltip explaining the required level vs original base level.
+ */
+function MaterialBadge({
+  material,
+  onClick,
+  isHighlighted = false,
+  compact = false,
+}: {
+  material: MaterialItem;
+  onClick: () => void;
+  isHighlighted?: boolean;
+  compact?: boolean;
+}) {
+  const matMeta = PERSONA_META[material.name];
+  const baseLvl = material.baseLevel ?? matMeta?.level ?? material.level;
+  const reqLvl = material.requiredLevel ?? material.level;
+  const isLevelBoosted = reqLvl > baseLvl;
+
+  const tooltip = isLevelBoosted
+    ? `合体要求等级: Lv.${reqLvl} (需练级 · 初始原始等级: Lv.${baseLvl})`
+    : `合体等级: Lv.${reqLvl} (图鉴初始等级)`;
+
+  return (
+    <button
+      onClick={onClick}
+      title={tooltip}
+      className={`inline-flex items-center gap-1 transition-all shadow-[1px_1px_0_#000] p5-skew-l group/mat cursor-pointer ${
+        compact ? 'px-1.5 py-0.5' : 'px-2 py-0.5'
+      } ${
+        isHighlighted
+          ? 'bg-[#e60012] text-white font-black'
+          : 'bg-black hover:bg-[#e60012] text-white hover:text-white'
+      }`}
+    >
+      <span className="p5-unskew-l flex items-center gap-1 text-[11px] sm:text-xs">
+        {/* Arcana Tag */}
+        {matMeta && (
+          <span
+            className={`px-1 py-0 text-[9px] sm:text-[10px] font-black ${
+              isHighlighted ? 'bg-black text-white' : 'bg-white text-black'
+            }`}
+          >
+            {matMeta.arcana}
+          </span>
+        )}
+
+        {/* Persona Name */}
+        <span
+          className={`font-bold ${
+            isHighlighted ? 'text-white' : 'text-zinc-100 group-hover/mat:text-white'
+          }`}
+        >
+          {material.name}
+        </span>
+
+        {/* Level Tag: P5R signature yellow tag if boosted, else red/white */}
+        {isLevelBoosted ? (
+          <span
+            className="font-mono font-black text-[10px] sm:text-[11px] px-1 py-0 bg-[#f2c300] text-black shadow-[1px_1px_0_#000]"
+            title={`合体要求 Lv.${reqLvl} (初始原始等级 Lv.${baseLvl})`}
+          >
+            Lv{reqLvl}*
+          </span>
+        ) : (
+          <span
+            className={`font-mono font-black text-[10px] sm:text-[11px] ${
+              isHighlighted
+                ? 'text-white'
+                : 'text-[#e60012] group-hover/mat:text-white'
+            }`}
+          >
+            Lv{reqLvl}
+          </span>
+        )}
+      </span>
+    </button>
+  );
+}
 
 export default function App() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -166,7 +250,7 @@ export default function App() {
                 type="text"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="搜索面具名、材料名、塔罗牌（如：亚森、死神）..."
+                placeholder="搜索面具名、材料名、塔罗牌（如：亚森、死神、双角兽）..."
                 className="w-full bg-[#08080b] text-white pl-9 sm:pl-10 pr-12 sm:pr-10 py-2 text-xs sm:text-sm font-bold shadow-[2px_2px_0_#000] focus:bg-[#000000] focus:outline-none focus:ring-2 focus:ring-[#e60012] transition-colors"
               />
               {searchTerm && (
@@ -242,6 +326,16 @@ export default function App() {
             })}
           </div>
 
+          {/* Level highlight explanation tip */}
+          <div className="mt-2.5 pt-2 border-t border-white/5 flex items-center gap-2 text-[11px] text-zinc-400">
+            <span className="px-1.5 py-0 bg-[#f2c300] text-black font-mono font-black text-[10px] shadow-[1px_1px_0_#000]">
+              Lv.*
+            </span>
+            <span>
+              黄色高亮代表<strong>合体要求等级</strong>高于图鉴基础等级（需预先练级），鼠标悬停可查看原始等级。
+            </span>
+          </div>
+
         </div>
 
         {/* ============================================================ */}
@@ -312,42 +406,26 @@ export default function App() {
                     </button>
                   </div>
 
-                  {/* Card Body: Material Recipes */}
+                  {/* Card Body: Material Recipes with boosted level highlight */}
                   <div className="pt-2">
                     <div className="text-[10px] text-zinc-400 font-mono font-bold mb-1.5">
                       合成素材:
                     </div>
                     <div className="flex flex-wrap items-center gap-1.5">
-                      {row.materials.map((mat, mIdx) => {
-                        const matMeta = PERSONA_META[mat.name];
-                        return (
-                          <React.Fragment key={`${mat.name}-${mIdx}`}>
-                            {mIdx > 0 && (
-                              <span className="text-[#e60012] font-black text-xs px-0.5">
-                                ×
-                              </span>
-                            )}
-                            <button
-                              onClick={() => setInspectedPersona(mat.name)}
-                              className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-black active:bg-[#e60012] text-white shadow-[1px_1px_0_#000] p5-skew-l"
-                            >
-                              <span className="p5-unskew-l flex items-center gap-1 text-[11px]">
-                                {matMeta && (
-                                  <span className="bg-white text-black px-1 py-0 text-[9px] font-black">
-                                    {matMeta.arcana}
-                                  </span>
-                                )}
-                                <span className="font-bold text-zinc-100">
-                                  {mat.name}
-                                </span>
-                                <span className="font-mono text-[#e60012] font-black text-[10px]">
-                                  Lv{mat.level}
-                                </span>
-                              </span>
-                            </button>
-                          </React.Fragment>
-                        );
-                      })}
+                      {row.materials.map((mat, mIdx) => (
+                        <React.Fragment key={`${mat.name}-${mIdx}`}>
+                          {mIdx > 0 && (
+                            <span className="text-[#e60012] font-black text-xs px-0.5">
+                              ×
+                            </span>
+                          )}
+                          <MaterialBadge
+                            material={mat}
+                            onClick={() => setInspectedPersona(mat.name)}
+                            compact
+                          />
+                        </React.Fragment>
+                      ))}
                     </div>
                   </div>
 
@@ -463,7 +541,7 @@ export default function App() {
                       <td className="py-2 px-4 text-center whitespace-nowrap">
                         <button
                           onClick={() => setInspectedPersona(row.name)}
-                          className="inline-flex items-center justify-center px-3 py-1 bg-[#e60012] hover:bg-white text-white hover:text-black font-black text-xs sm:text-sm tracking-wide p5-skew-l shadow-[3px_3px_0_#000] transition-all hover:scale-105"
+                          className="inline-flex items-center justify-center px-3 py-1 bg-[#e60012] hover:bg-white text-white hover:text-black font-black text-xs sm:text-sm tracking-wide p5-skew-l shadow-[3px_3px_0_#000] transition-all hover:scale-105 cursor-pointer"
                         >
                           <span className="p5-unskew-l">
                             {row.name}
@@ -474,36 +552,19 @@ export default function App() {
                       {/* Materials List */}
                       <td className="py-2 px-4 text-left">
                         <div className="flex flex-wrap items-center gap-1.5">
-                          {row.materials.map((mat, mIdx) => {
-                            const matMeta = PERSONA_META[mat.name];
-                            return (
-                              <React.Fragment key={`${mat.name}-${mIdx}`}>
-                                {mIdx > 0 && (
-                                  <span className="text-[#e60012] font-black text-sm px-0.5">
-                                    ×
-                                  </span>
-                                )}
-                                <button
-                                  onClick={() => setInspectedPersona(mat.name)}
-                                  className="inline-flex items-center gap-1 px-2 py-0.5 bg-black hover:bg-[#e60012] text-white hover:text-white transition-colors shadow-[2px_2px_0_#000] p5-skew-l group/mat"
-                                >
-                                  <span className="p5-unskew-l flex items-center gap-1 text-xs">
-                                    {matMeta && (
-                                      <span className="bg-white text-black px-1 py-0 text-[10px] font-black">
-                                        {matMeta.arcana}
-                                      </span>
-                                    )}
-                                    <span className="font-bold text-zinc-100 group-hover/mat:text-white">
-                                      {mat.name}
-                                    </span>
-                                    <span className="font-mono text-[#e60012] group-hover/mat:text-white font-black text-[11px]">
-                                      Lv{mat.level}
-                                    </span>
-                                  </span>
-                                </button>
-                              </React.Fragment>
-                            );
-                          })}
+                          {row.materials.map((mat, mIdx) => (
+                            <React.Fragment key={`${mat.name}-${mIdx}`}>
+                              {mIdx > 0 && (
+                                <span className="text-[#e60012] font-black text-sm px-0.5">
+                                  ×
+                                </span>
+                              )}
+                              <MaterialBadge
+                                material={mat}
+                                onClick={() => setInspectedPersona(mat.name)}
+                              />
+                            </React.Fragment>
+                          ))}
                         </div>
                       </td>
 
@@ -512,7 +573,7 @@ export default function App() {
                         <button
                           onClick={() => handleCopy(row.text, row.id)}
                           title="复制合成公式"
-                          className="px-2 py-0.5 text-xs font-black text-white hover:text-black bg-black hover:bg-white shadow-[2px_2px_0_#000] transition-colors inline-flex items-center gap-1 p5-skew-l"
+                          className="px-2 py-0.5 text-xs font-black text-white hover:text-black bg-black hover:bg-white shadow-[2px_2px_0_#000] transition-colors inline-flex items-center gap-1 p5-skew-l cursor-pointer"
                         >
                           <span className="p5-unskew-l flex items-center gap-1">
                             {copiedId === row.id ? (
@@ -541,7 +602,7 @@ export default function App() {
           <div className="bg-[#0b0b0e] px-5 py-2.5 flex items-center justify-between text-xs text-zinc-300 border-t border-white/10">
             <div className="flex items-center gap-2">
               <span className="w-2 h-2 bg-[#e60012] inline-block" />
-              <span>提示：点击任意红底面具名或材料名，即可展开该面具的双向合成明细</span>
+              <span>提示：材料带有黄色高亮表示该配方需提前提升该面具等级至所标数值</span>
             </div>
             <div className="font-mono font-bold text-zinc-400">
               PERSONA 5 STRIKERS COMPENDIUM
@@ -552,7 +613,7 @@ export default function App() {
 
       </main>
 
-      {/* QUICK PERSONA INSPECTION MODAL (移动端全屏友好与自适应 padding) */}
+      {/* QUICK PERSONA INSPECTION MODAL */}
       {inspectedPersona && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center p-2.5 sm:p-4 bg-black/85 backdrop-blur-sm animate-fadeIn"
@@ -568,7 +629,7 @@ export default function App() {
             {/* Close Button */}
             <button
               onClick={() => setInspectedPersona(null)}
-              className="absolute top-3 right-3 sm:top-3.5 sm:right-4 p-1 text-white bg-black hover:bg-[#e60012] active:bg-[#e60012] shadow-[2px_2px_0_#000] transition-colors p5-skew-l"
+              className="absolute top-3 right-3 sm:top-3.5 sm:right-4 p-1 text-white bg-black hover:bg-[#e60012] active:bg-[#e60012] shadow-[2px_2px_0_#000] transition-colors p5-skew-l cursor-pointer"
             >
               <span className="p5-unskew-l">
                 <X className="w-4 h-4" />
@@ -584,7 +645,7 @@ export default function App() {
                   </span>
                 )}
                 <span className="bg-black text-white font-mono font-black text-[10px] sm:text-xs px-2 py-0.5 shadow-[1px_1px_0_#000]">
-                  Lv.{inspectedMeta?.level}
+                  基础 Lv.{inspectedMeta?.level}
                 </span>
               </div>
               <div className="inline-block bg-[#e60012] text-white px-3 py-1 p5-skew-l shadow-[3px_3px_0_#000]">
@@ -618,32 +679,16 @@ export default function App() {
                           <span className="font-mono text-white bg-black px-1.5 py-0.5 font-black text-[10px] sm:text-[11px] shrink-0">
                             #{i + 1}
                           </span>
-                          {r.materials.map((m, mi) => {
-                            const mMeta = PERSONA_META[m.name];
-                            return (
-                              <React.Fragment key={mi}>
-                                {mi > 0 && <span className="text-[#e60012] font-black">×</span>}
-                                <button
-                                  onClick={() => setInspectedPersona(m.name)}
-                                  className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-black active:bg-[#e60012] text-white transition-colors shadow-[2px_2px_0_#000] p5-skew-l"
-                                >
-                                  <span className="p5-unskew-l flex items-center gap-1 text-[11px]">
-                                    {mMeta && (
-                                      <span className="bg-white text-black px-1 py-0 text-[9px] font-black">
-                                        {mMeta.arcana}
-                                      </span>
-                                    )}
-                                    <span className="font-bold text-zinc-100">
-                                      {m.name}
-                                    </span>
-                                    <span className="font-mono text-[#e60012] font-black text-[10px]">
-                                      Lv{m.level}
-                                    </span>
-                                  </span>
-                                </button>
-                              </React.Fragment>
-                            );
-                          })}
+                          {r.materials.map((m, mi) => (
+                            <React.Fragment key={mi}>
+                              {mi > 0 && <span className="text-[#e60012] font-black">×</span>}
+                              <MaterialBadge
+                                material={m}
+                                onClick={() => setInspectedPersona(m.name)}
+                                compact
+                              />
+                            </React.Fragment>
+                          ))}
                         </div>
                       </div>
                     ))}
@@ -679,7 +724,7 @@ export default function App() {
                             )}
                             <button
                               onClick={() => setInspectedPersona(r.name)}
-                              className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-[#e60012] active:bg-white text-white active:text-black font-black text-xs p5-skew-l shadow-[2px_2px_0_#000] transition-colors"
+                              className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-[#e60012] active:bg-white text-white active:text-black font-black text-xs p5-skew-l shadow-[2px_2px_0_#000] transition-colors cursor-pointer"
                             >
                               <span className="p5-unskew-l flex items-center gap-1">
                                 <span>{r.name}</span>
@@ -693,45 +738,21 @@ export default function App() {
                             <span className="text-[10px] sm:text-[11px] text-zinc-400 font-mono font-bold mr-1 shrink-0">
                               材料:
                             </span>
-                            {r.materials.map((m, mIdx) => {
-                              const isCurrent = m.name === inspectedPersona;
-                              const mMeta = PERSONA_META[m.name];
-                              return (
-                                <React.Fragment key={mIdx}>
-                                  {mIdx > 0 && (
-                                    <span className="text-[#e60012] font-black text-xs px-0.5">
-                                      ×
-                                    </span>
-                                  )}
-                                  <button
-                                    onClick={() => setInspectedPersona(m.name)}
-                                    className={`inline-flex items-center gap-1 px-1.5 py-0.5 transition-colors shadow-[1px_1px_0_#000] p5-skew-l ${
-                                      isCurrent
-                                        ? 'bg-[#e60012] text-white font-black'
-                                        : 'bg-black active:bg-[#e60012] text-zinc-200 active:text-white'
-                                    }`}
-                                  >
-                                    <span className="p5-unskew-l flex items-center gap-1 text-[11px]">
-                                      {mMeta && (
-                                        <span className={`px-1 py-0 text-[9px] font-black ${
-                                          isCurrent ? 'bg-black text-white' : 'bg-white text-black'
-                                        }`}>
-                                          {mMeta.arcana}
-                                        </span>
-                                      )}
-                                      <span className="font-bold">
-                                        {m.name}
-                                      </span>
-                                      <span className={`font-mono font-black text-[10px] ${
-                                        isCurrent ? 'text-white' : 'text-[#e60012]'
-                                      }`}>
-                                        Lv{m.level}
-                                      </span>
-                                    </span>
-                                  </button>
-                                </React.Fragment>
-                              );
-                            })}
+                            {r.materials.map((m, mIdx) => (
+                              <React.Fragment key={mIdx}>
+                                {mIdx > 0 && (
+                                  <span className="text-[#e60012] font-black text-xs px-0.5">
+                                    ×
+                                  </span>
+                                )}
+                                <MaterialBadge
+                                  material={m}
+                                  onClick={() => setInspectedPersona(m.name)}
+                                  isHighlighted={m.name === inspectedPersona}
+                                  compact
+                                />
+                              </React.Fragment>
+                            ))}
                           </div>
 
                         </div>
