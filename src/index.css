@@ -1,0 +1,96 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --p5-red: #e60012;
+    --p5-red-dark: #b3000e;
+    --p5-black: #08080a;
+    --p5-black-card: #121217;
+    --p5-black-row-alt: #16161c;
+    --p5-white: #ffffff;
+  }
+
+  body {
+    background-color: #08080a;
+    color: #ffffff;
+    font-family: 'Noto Sans SC', system-ui, -apple-system, sans-serif;
+    overflow-x: hidden;
+  }
+}
+
+.font-p5-display {
+  font-family: 'Montserrat', 'Noto Sans SC', sans-serif;
+  font-style: italic;
+  font-weight: 900;
+}
+
+/* Authentic P5 Halftone & Comic Striping Background - Pure Red & Black only */
+.p5-bg-pattern {
+  background-color: #08080a;
+  background-image: 
+    radial-gradient(rgba(230, 0, 18, 0.12) 1.5px, transparent 1.5px),
+    linear-gradient(135deg, rgba(230, 0, 18, 0.04) 25%, transparent 25%, transparent 50%, rgba(230, 0, 18, 0.04) 50%, rgba(230, 0, 18, 0.04) 75%, transparent 75%, transparent);
+  background-size: 24px 24px, 48px 48px;
+}
+
+/* P5 Slanted Dynamic Cut */
+.p5-skew-l {
+  transform: skew(-6deg);
+}
+
+.p5-skew-r {
+  transform: skew(6deg);
+}
+
+.p5-unskew-l {
+  transform: skew(6deg);
+}
+
+.p5-unskew-r {
+  transform: skew(-6deg);
+}
+
+/* P5 Flat Cut Cards & Polygons - clean geometry without border clutter */
+.p5-cut-card {
+  clip-path: polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 20px 100%, 0 calc(100% - 20px));
+}
+
+.p5-cut-corner-br {
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 16px), calc(100% - 16px) 100%, 0 100%);
+}
+
+.p5-cut-corner-both {
+  clip-path: polygon(14px 0, 100% 0, 100% calc(100% - 14px), calc(100% - 14px) 100%, 0 100%, 0 14px);
+}
+
+.p5-cut-pill {
+  clip-path: polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%);
+}
+
+/* P5 Hard Offset Shadow */
+.p5-shadow-red {
+  box-shadow: 4px 4px 0 #e60012;
+}
+
+.p5-shadow-black {
+  box-shadow: 4px 4px 0 #000000;
+}
+
+.p5-shadow-white {
+  box-shadow: 4px 4px 0 #ffffff;
+}
+
+/* Custom P5 Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #0d0d11;
+}
+::-webkit-scrollbar-thumb {
+  background: #e60012;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #ff2a3b;
+}

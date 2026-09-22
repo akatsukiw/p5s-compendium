@@ -1,0 +1,6 @@
+{
+  "name": "P5S 面具合成与路线全书",
+  "description": "女神异闻录5S (P5S) 面具合成表、树状合成路径图与全人格面具数据库 (P5R红黑潮酷美术风格)",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
