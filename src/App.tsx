@@ -70,11 +70,11 @@ function MaterialBadge({
           : 'bg-[#0f0f15] hover:bg-[#e60012] text-white border border-white/10'
       }`}
     >
-      <span className="p5-unskew-l flex items-center gap-1 text-[11px] sm:text-xs">
+      <span className={`p5-unskew-l flex items-center ${compact ? 'gap-0.5 text-[10px] sm:text-xs' : 'gap-1 text-[11px] sm:text-xs'}`}>
         {/* Arcana Tag */}
         {matMeta && (
           <span
-            className={`px-1 py-0 text-[9px] sm:text-[10px] font-black shrink-0 ${
+            className={`px-0.5 sm:px-1 py-0 text-[8.5px] sm:text-[10px] font-black shrink-0 leading-tight ${
               isHighlighted ? 'bg-black text-white' : 'bg-white text-black'
             }`}
           >
@@ -84,7 +84,7 @@ function MaterialBadge({
 
         {/* Persona Name */}
         <span
-          className={`font-bold ${
+          className={`font-bold tracking-tight ${
             isHighlighted ? 'text-white' : 'text-zinc-100 group-hover/mat:text-white'
           }`}
         >
@@ -94,18 +94,18 @@ function MaterialBadge({
         {/* Level Tag: Refined and unified style */}
         {isLevelBoosted ? (
           <span
-            className={`font-mono font-black text-[10px] sm:text-[11px] tracking-tight ${
+            className={`font-mono font-black text-[9.5px] sm:text-[11px] tracking-tighter ${
               isHighlighted
                 ? 'text-[#ffe57f]'
                 : 'text-[#f6c344] group-hover/mat:text-[#fffb00]'
             }`}
             title={`合体要求 Lv.${reqLvl} (初始原始等级 Lv.${baseLvl})`}
           >
-            Lv{reqLvl}<span className="text-[10px] font-bold text-[#f6c344] group-hover/mat:text-[#fffb00] ml-0.5">▲</span>
+            Lv{reqLvl}<span className="text-[9px] font-bold text-[#f6c344] group-hover/mat:text-[#fffb00] ml-0.2">▲</span>
           </span>
         ) : (
           <span
-            className={`font-mono font-black text-[10px] sm:text-[11px] ${
+            className={`font-mono font-black text-[9.5px] sm:text-[11px] tracking-tight ${
               isHighlighted
                 ? 'text-white'
                 : 'text-[#e60012] group-hover/mat:text-white'
@@ -285,37 +285,26 @@ export default function App() {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-4">
             
             {/* Logo Badge in P5S Cut-Out Style */}
-            <div className="flex items-center gap-2.5 sm:gap-3">
-              <div className="bg-[#e60012] text-white font-p5-display text-xl sm:text-2xl px-2.5 sm:px-3.5 py-0.5 sm:py-1 p5-skew-l shadow-[3px_3px_0_#000] flex items-center justify-center shrink-0">
+            <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+              <div className="bg-[#e60012] text-white font-p5-display text-base sm:text-2xl px-2 sm:px-3.5 py-0.5 sm:py-1 p5-skew-l shadow-[2px_2px_0_#000] sm:shadow-[3px_3px_0_#000] flex items-center justify-center shrink-0">
                 <span className="p5-unskew-l tracking-tighter">P5S</span>
               </div>
-              <div className="min-w-0">
-                <div className="flex items-center gap-2">
-                  <h1 className="text-lg sm:text-2xl font-black italic tracking-wider text-white uppercase truncate">
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-1.5 sm:gap-2 flex-nowrap">
+                  <h1 className="text-sm xs:text-base sm:text-2xl font-black italic tracking-tight sm:tracking-wider text-white uppercase truncate shrink min-w-0">
                     Persona 5 <span className="text-[#e60012]">Strikers</span>
                   </h1>
-                  <span className="bg-white text-black font-mono text-[10px] sm:text-[11px] font-black px-1.5 sm:px-2 py-0.5 p5-skew-l shadow-[2px_2px_0_#000] shrink-0">
+                  <span className="bg-white text-black font-mono text-[9px] sm:text-[11px] font-black px-1 sm:px-2 py-0 sm:py-0.5 p5-skew-l shadow-[1.5px_1.5px_0_#000] sm:shadow-[2px_2px_0_#000] shrink-0">
                     <span className="p5-unskew-l">合体全书</span>
                   </span>
                 </div>
-                <p className="text-[11px] sm:text-xs text-zinc-400 font-bold tracking-wide mt-0.5 line-clamp-1">
+                <p className="text-[10px] sm:text-xs text-zinc-400 font-bold tracking-wide mt-0.5 truncate">
                   女神异闻录5对决：幽灵先锋 · 合体配方资料库
                 </p>
               </div>
             </div>
 
-            {/* Quick Status Stats */}
-            <div className="flex items-center gap-2 bg-[#121217] px-3 py-1 self-start sm:self-auto shadow-[3px_3px_0_#000] p5-skew-l border border-white/5">
-              <div className="p5-unskew-l flex items-center gap-2.5 text-[11px] sm:text-xs font-bold">
-                <span className="text-zinc-300">
-                  全书: <strong className="text-white font-mono">{ALL_PERSONA_NAMES.length}</strong> 体
-                </span>
-                <span className="w-1.5 h-2.5 bg-[#e60012] inline-block" />
-                <span className="text-zinc-300">
-                  配方: <strong className="text-[#e60012] font-mono">{FUSION_ROWS.length}</strong> 条
-                </span>
-              </div>
-            </div>
+            
 
           </div>
         </div>
@@ -329,50 +318,50 @@ export default function App() {
           {/* Top Red Bar Decor */}
           <div className="absolute top-0 left-0 right-0 h-1 sm:h-1.5 bg-[#e60012]" />
 
-          {/* Search bar & Sorting bar */}
-          <div className="flex flex-col sm:grid sm:grid-cols-12 gap-2.5 sm:gap-3 items-stretch sm:items-center">
+          {/* Search bar & Sorting bar (Single line on all screens) */}
+          <div className="flex items-center gap-1.5 sm:gap-3">
             
             {/* Search Input */}
-            <div className="sm:col-span-8 relative">
-              <div className="absolute left-3 top-1/2 -translate-y-1/2 text-white flex items-center pointer-events-none">
-                <Search className="w-4 h-4 text-[#e60012]" />
+            <div className="flex-1 min-w-0 relative">
+              <div className="absolute left-2.5 sm:left-3 top-1/2 -translate-y-1/2 text-white flex items-center pointer-events-none">
+                <Search className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#e60012]" />
               </div>
               <input
                 type="text"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="搜索面具名、材料名、塔罗牌（如：亚森、死神、双角兽）..."
-                className="w-full bg-[#08080b] text-white pl-9 sm:pl-10 pr-12 sm:pr-10 py-2 text-xs sm:text-sm font-bold shadow-[2px_2px_0_#000] focus:bg-[#000000] focus:outline-none focus:ring-2 focus:ring-[#e60012] transition-colors"
+                placeholder="搜索面具、材料、塔罗牌..."
+                className="w-full bg-[#08080b] text-white pl-8 sm:pl-10 pr-7 sm:pr-10 py-1.5 sm:py-2 text-xs sm:text-sm font-bold shadow-[2px_2px_0_#000] focus:bg-[#000000] focus:outline-none focus:ring-2 focus:ring-[#e60012] transition-colors truncate"
               />
               {searchTerm && (
                 <button
                   onClick={() => setSearchTerm('')}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[11px] text-white bg-[#e60012] hover:bg-black px-1.5 py-0.5 font-black transition-colors"
+                  className="absolute right-1.5 sm:right-2.5 top-1/2 -translate-y-1/2 text-[10px] sm:text-[11px] text-white bg-[#e60012] hover:bg-black px-1.5 py-0.5 font-black transition-colors"
                 >
                   ✕
                 </button>
               )}
             </div>
 
-            {/* Sorting Field */}
-            <div className="sm:col-span-4 flex items-center gap-2">
-              <span className="text-[11px] sm:text-xs text-zinc-300 font-bold whitespace-nowrap">排序:</span>
+            {/* Sorting Controls */}
+            <div className="flex items-center gap-1 sm:gap-2 shrink-0">
               <select
                 value={sortField}
                 onChange={(e) => setSortField(e.target.value as any)}
-                className="flex-1 min-w-0 bg-[#08080b] text-white px-2 sm:px-3 py-1.5 sm:py-2 text-xs font-black shadow-[2px_2px_0_#000] focus:outline-none focus:ring-2 focus:ring-[#e60012]"
+                aria-label="排序规则"
+                className="bg-[#08080b] text-white px-1.5 sm:px-3 py-1.5 sm:py-2 text-[11px] sm:text-xs font-black shadow-[2px_2px_0_#000] focus:outline-none focus:ring-2 focus:ring-[#e60012] cursor-pointer"
               >
-                <option value="level">按 等级 (Lv) 排序</option>
-                <option value="arcana">按 塔罗牌 (Arcana) 排序</option>
-                <option value="name">按 面具名称 (Name) 排序</option>
+                <option value="level">等级 (Lv)</option>
+                <option value="arcana">塔罗牌</option>
+                <option value="name">面具名</option>
               </select>
               <button
                 onClick={() => setSortAsc(!sortAsc)}
                 title={sortAsc ? '切换为降序' : '切换为升序'}
-                className="px-2.5 sm:px-3 py-1.5 sm:py-2 bg-[#e60012] hover:bg-white hover:text-black text-white font-black text-xs flex items-center gap-1 shadow-[2px_2px_0_#000] transition-colors whitespace-nowrap p5-skew-l shrink-0"
+                className="px-2 sm:px-3 py-1.5 sm:py-2 bg-[#e60012] hover:bg-white hover:text-black text-white font-black text-[11px] sm:text-xs flex items-center gap-1 shadow-[2px_2px_0_#000] transition-colors whitespace-nowrap p5-skew-l shrink-0 cursor-pointer active:scale-95"
               >
                 <span className="p5-unskew-l flex items-center gap-1">
-                  <ArrowUpDown className="w-3.5 h-3.5" />
+                  <ArrowUpDown className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                   <span>{sortAsc ? '升序↑' : '降序↓'}</span>
                 </span>
               </button>
@@ -419,9 +408,8 @@ export default function App() {
 
           {/* Level Quick Index Bar: 像塔罗牌一样，点击等级快速定位跳到对应等级的面具 */}
           <div className="mt-2.5 pt-2 sm:pt-2.5 border-t border-white/10 flex items-center gap-1.5 flex-wrap overflow-x-auto pr-1 sm:pr-0">
-            <span className="text-[10px] sm:text-[11px] text-zinc-300 font-black uppercase mr-1 flex items-center gap-1 shrink-0" title="金色 Lv.▲ 标记代表合体要求等级高于图鉴初始等级，需预先练级">
+            <span className="text-[10px] sm:text-[11px] text-zinc-300 font-black uppercase mr-1 flex items-center gap-1 shrink-0">
               <Bookmark className="w-3 h-3 text-[#e60012]" /> 等级索引:
-              <span className="ml-1 text-[10px] font-mono text-[#f6c344] font-bold cursor-help bg-black/60 px-1 py-0.2 border border-[#f6c344]/40" title="金色 Lv.▲ 标记代表合体要求等级高于图鉴初始等级，需预先练级">Lv.▲需练级</span>
             </span>
             {LEVEL_INDEX_TIERS.map((tier) => {
               const isActive = activeLevelHighlight === tier;
@@ -451,15 +439,23 @@ export default function App() {
         {/* ============================================================ */}
         <div className="block md:hidden space-y-3">
           {/* Mobile Top Stats Banner */}
-          <div className="bg-[#181822] px-3 py-2 flex items-center justify-between border-l-4 border-[#e60012] shadow-[2px_2px_0_#000]">
-            <div className="flex items-center gap-1.5">
-              <Layers className="w-3.5 h-3.5 text-[#e60012]" />
-              <span className="text-xs font-black uppercase text-white tracking-wider">
-                面具整合列表 ({personaGroups.length} 款面具)
+          <div className="bg-[#181822] px-2.5 py-1.5 flex items-center justify-between border-l-4 border-[#e60012] shadow-[2px_2px_0_#000]">
+            <div className="flex items-center gap-1 min-w-0">
+              <Layers className="w-3.5 h-3.5 text-[#e60012] shrink-0" />
+              <span className="text-[11px] font-black uppercase text-white tracking-tight truncate">
+                面具列表 ({personaGroups.length}款)
               </span>
             </div>
-            <div className="text-[11px] text-zinc-300 font-mono font-bold">
-              共 <strong className="text-[#e60012] font-black">{filteredRows.length}</strong> 条配方
+            <div className="flex items-center gap-2 shrink-0">
+              <span
+                className="text-[10px] font-mono font-bold text-[#f6c344] bg-black/80 px-1 py-0.5 border border-[#f6c344]/40 shadow-[1px_1px_0_#000] cursor-help inline-flex items-center shrink-0 select-none"
+                title="合体要求等级高于初始等级，需预先练级"
+              >
+                Lv.▲需练级
+              </span>
+              <div className="text-[10px] text-zinc-300 font-mono font-bold">
+                共 <strong className="text-[#e60012] font-black">{filteredRows.length}</strong> 条配方
+              </div>
             </div>
           </div>
 
@@ -517,14 +513,14 @@ export default function App() {
                       >
                         {/* 左侧：序号与材料组合 (横向同行不折行，材料两端对齐紧凑，长名称不折断) */}
                         <div className="min-w-0 flex-1 py-0.5">
-                          <div className="flex flex-wrap items-center gap-1">
-                            <span className="font-mono text-[9px] text-zinc-400 bg-black px-1 py-0.5 font-black shrink-0 border border-white/10">
+                          <div className="flex flex-wrap items-center gap-0.5 sm:gap-1">
+                            <span className="font-mono text-[9px] text-zinc-400 bg-black px-1 py-0.5 font-black shrink-0 border border-white/10 mr-0.5">
                               #{rIdx + 1}
                             </span>
                             {row.materials.map((mat, mIdx) => (
                               <React.Fragment key={`${mat.name}-${mIdx}`}>
                                 {mIdx > 0 && (
-                                  <span className="text-[#e60012] font-black text-xs px-0.5 shrink-0 select-none">
+                                  <span className="text-[#e60012] font-black text-[11px] sm:text-xs px-0 sm:px-0.5 shrink-0 select-none scale-90">
                                     ×
                                   </span>
                                 )}
@@ -576,8 +572,16 @@ export default function App() {
                 PERSONA 5 STRIKERS DATABASE
               </span>
             </div>
-            <div className="text-xs text-zinc-300 font-mono font-bold">
-              显示 <strong className="text-white font-black">{filteredRows.length}</strong> 条配方 · 涵盖 <strong className="text-[#e60012] font-black">{personaGroups.length}</strong> 款面具
+            <div className="flex items-center gap-3 text-xs text-zinc-300 font-mono font-bold">
+              <span
+                className="text-[10px] sm:text-[11px] font-mono font-bold text-[#f6c344] bg-black/80 px-1.5 py-0.5 border border-[#f6c344]/40 shadow-[1px_1px_0_#000] cursor-help inline-flex items-center gap-0.5 shrink-0 select-none"
+                title="合体要求等级高于初始等级，需预先练级"
+              >
+                <span>Lv.▲需练级</span>
+              </span>
+              <span>
+                显示 <strong className="text-white font-black">{filteredRows.length}</strong> 条配方 · 涵盖 <strong className="text-[#e60012] font-black">{personaGroups.length}</strong> 款面具
+              </span>
             </div>
           </div>
 
@@ -711,14 +715,14 @@ export default function App() {
 
                         {/* Materials List */}
                         <td className="py-2 px-4 text-left">
-                          <div className="flex flex-wrap items-center gap-1.5">
+                          <div className="flex flex-wrap items-center gap-1 sm:gap-1.5">
                             <span className="text-[10px] font-mono text-zinc-500 mr-0.5">
                               #{personaGroups.find(g => g.name === row.name)?.recipes.findIndex(r => r.id === row.id)! + 1}
                             </span>
                             {row.materials.map((mat, mIdx) => (
                               <React.Fragment key={`${mat.name}-${mIdx}`}>
                                 {mIdx > 0 && (
-                                  <span className="text-[#e60012] font-black text-sm px-0.5">
+                                  <span className="text-[#e60012] font-black text-xs sm:text-sm px-0 sm:px-0.5 select-none">
                                     ×
                                   </span>
                                 )}
