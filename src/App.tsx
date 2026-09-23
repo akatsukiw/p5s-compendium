@@ -14,8 +14,12 @@ import {
   X,
   Layers,
   Bookmark,
+  GitMerge,
+  Route,
 } from 'lucide-react';
 import type { MaterialItem, FusionRow } from './types';
+import { PathFinderModal } from './components/PathFinderModal';
+import { MaterialBadge } from './components/MaterialBadge';
 
 /**
  * Level quick navigation index tiers (Lv 5, 10, 15, 20 ... 60, 67, etc.)
@@ -32,93 +36,6 @@ interface PersonaGroup {
   recipes: FusionRow[];
 }
 
-/**
- * Reusable component for rendering Persona Material Badges:
- * - When requiredLevel > baseLevel, elegantly styles the level text (e.g. bold coral-gold text with asterisk)
- *   instead of a jarring yellow background block, harmonizing with P5 dark/red aesthetics.
- * - Shows clear hover/title tooltip explaining the required level vs original base level.
- */
-function MaterialBadge({
-  material,
-  onClick,
-  isHighlighted = false,
-  compact = false,
-}: {
-  material: MaterialItem;
-  onClick: () => void;
-  isHighlighted?: boolean;
-  compact?: boolean;
-}) {
-  const matMeta = PERSONA_META[material.name];
-  const baseLvl = material.baseLevel ?? matMeta?.level ?? material.level;
-  const reqLvl = material.requiredLevel ?? material.level;
-  const isLevelBoosted = reqLvl > baseLvl;
-
-  const tooltip = isLevelBoosted
-    ? `合体要求等级: Lv.${reqLvl} (需练级 · 初始原始等级: Lv.${baseLvl})`
-    : `合体等级: Lv.${reqLvl} (图鉴初始等级)`;
-
-  return (
-    <button
-      onClick={onClick}
-      title={tooltip}
-      className={`inline-flex items-center transition-all shadow-[1px_1px_0_#000] p5-skew-l group/mat cursor-pointer whitespace-nowrap shrink-0 ${
-        compact ? 'px-1 py-0.5 gap-0.5' : 'px-1.5 py-0.5 gap-1'
-      } ${
-        isHighlighted
-          ? 'bg-[#e60012] text-white font-black ring-1 ring-white/40'
-          : 'bg-[#0f0f15] hover:bg-[#e60012] text-white border border-white/10'
-      }`}
-    >
-      <span className={`p5-unskew-l flex items-center leading-none ${compact ? 'gap-0.5 text-[11px] sm:text-[13px]' : 'gap-1 text-xs sm:text-[14px]'}`}>
-        {/* Arcana Tag */}
-        {matMeta && (
-          <span
-            className={`px-0.5 sm:px-1 py-0 text-[9px] sm:text-[10.5px] font-bold shrink-0 leading-tight ${
-              isHighlighted ? 'bg-black text-white' : 'bg-white text-black'
-            }`}
-          >
-            {matMeta.arcana}
-          </span>
-        )}
-
-        {/* Persona Name (700 weight for optimal readability) */}
-        <span
-          className={`font-bold tracking-tight ${
-            isHighlighted ? 'text-white' : 'text-zinc-100 group-hover/mat:text-white'
-          }`}
-        >
-          {material.name}
-        </span>
-
-        {/* Level Tag: Refined and unified style */}
-        {isLevelBoosted ? (
-          <span
-            className={`font-mono font-bold text-[10.5px] sm:text-xs tracking-tighter ${
-              isHighlighted
-                ? 'text-[#ffe57f]'
-                : 'text-[#f6c344] group-hover/mat:text-[#fffb00]'
-            }`}
-            title={`合体要求 Lv.${reqLvl} (初始原始等级 Lv.${baseLvl})`}
-          >
-            Lv{reqLvl}<span className="text-[9.5px] font-bold text-[#f6c344] group-hover/mat:text-[#fffb00] ml-0.2">▲</span>
-          </span>
-        ) : (
-          <span
-            className={`font-mono font-bold text-[10.5px] sm:text-xs tracking-tight ${
-              isHighlighted
-                ? 'text-white'
-                : 'text-[#e60012] group-hover/mat:text-white'
-            }`}
-          >
-            Lv{reqLvl}
-          </span>
-        )}
-      </span>
-    </button>
-  );
-}
-
 export default function App() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedArcana, setSelectedArcana] = useState('ALL');
@@ -128,6 +45,17 @@ export default function App() {
 
   // Quick detail modal state when clicking any persona name
   const [inspectedPersona, setInspectedPersona] = useState<string | null>(null);
+
+  // Path Finder modal state (BFS Shortest Path Explorer)
+  const [isPathFinderOpen, setIsPathFinderOpen] = useState<boolean>(false);
+  const [pathFinderFrom, setPathFinderFrom] = useState<string>('杰克灯笼');
+  const [pathFinderTo, setPathFinderTo] = useState<string>('杰克霜精');
+
+  const openPathFinder = (from?: string, to?: string) => {
+    if (from) setPathFinderFrom(from);
+    if (to) setPathFinderTo(to);
+    setIsPathFinderOpen(true);
+  };
 
   // Active level highlight for jump animation
   const [activeLevelHighlight, setActiveLevelHighlight] = useState<number | null>(null);
@@ -304,7 +232,22 @@ export default function App() {
               </div>
             </div>
 
-            
+            {/* Header Right Action: Path Finder Button */}
+            <div className="flex items-center gap-2 self-start sm:self-center shrink-0">
+              <button
+                onClick={() => openPathFinder()}
+                className="bg-[#e60012] hover:bg-white text-white hover:text-black font-black text-xs sm:text-sm px-2.5 sm:px-3.5 py-1.5 sm:py-2 p5-skew-l shadow-[2px_2px_0_#000] sm:shadow-[3px_3px_0_#000] transition-all flex items-center gap-1.5 cursor-pointer active:scale-95 group"
+                title="打开合成路径寻路器 (基于 BFS 算法)"
+              >
+                <span className="p5-unskew-l flex items-center gap-1.5">
+                  <Route className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white group-hover:text-black transition-colors" />
+                  <span>合成路径寻路器</span>
+                  <span className="hidden xs:inline-block bg-black text-white text-[9px] sm:text-[10px] px-1 py-0.2 font-mono ml-0.5">
+                    BFS
+                  </span>
+                </span>
+              </button>
+            </div>
 
           </div>
         </div>
@@ -815,10 +758,44 @@ export default function App() {
                   基础 Lv.{inspectedMeta?.level}
                 </span>
               </div>
-              <div className="inline-block bg-[#e60012] text-white px-3 py-1 p5-skew-l shadow-[3px_3px_0_#000]">
-                <h2 className="p5-unskew-l text-lg sm:text-xl font-black italic tracking-wide">
-                  {inspectedPersona}
-                </h2>
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div className="inline-block bg-[#e60012] text-white px-3 py-1 p5-skew-l shadow-[3px_3px_0_#000]">
+                  <h2 className="p5-unskew-l text-lg sm:text-xl font-black italic tracking-wide">
+                    {inspectedPersona}
+                  </h2>
+                </div>
+
+                <div className="flex items-center gap-1.5">
+                  <button
+                    onClick={() => {
+                      const cur = inspectedPersona;
+                      setInspectedPersona(null);
+                      openPathFinder(cur, '女武神');
+                    }}
+                    className="text-[11px] font-bold bg-[#14141d] hover:bg-[#e60012] text-zinc-300 hover:text-white px-2 py-1 p5-skew-l border border-white/10 shadow-[2px_2px_0_#000] transition-colors cursor-pointer"
+                    title="以此面具作为起点规划合成路线"
+                  >
+                    <span className="p5-unskew-l flex items-center gap-1">
+                      <Route className="w-3 h-3 text-[#e60012]" />
+                      设为寻路起点 (From)
+                    </span>
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      const cur = inspectedPersona;
+                      setInspectedPersona(null);
+                      openPathFinder('赛特', cur);
+                    }}
+                    className="text-[11px] font-bold bg-[#14141d] hover:bg-[#e60012] text-zinc-300 hover:text-white px-2 py-1 p5-skew-l border border-white/10 shadow-[2px_2px_0_#000] transition-colors cursor-pointer"
+                    title="以此面具作为终点规划合成路线"
+                  >
+                    <span className="p5-unskew-l flex items-center gap-1">
+                      <Route className="w-3 h-3 text-[#f6c344]" />
+                      设为寻路目标 (To)
+                    </span>
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -934,6 +911,18 @@ export default function App() {
           </div>
         </div>
       )}
+
+      {/* PATH FINDER MODAL (BFS Shortest Path) */}
+      <PathFinderModal
+        isOpen={isPathFinderOpen}
+        onClose={() => setIsPathFinderOpen(false)}
+        initialFrom={pathFinderFrom}
+        initialTo={pathFinderTo}
+        onSelectPersona={(name) => {
+          setIsPathFinderOpen(false);
+          setInspectedPersona(name);
+        }}
+      />
 
       {/* FOOTER */}
       <footer className="mt-10 sm:mt-16 text-center text-[11px] sm:text-xs text-zinc-400 pt-6 px-4">
