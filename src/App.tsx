@@ -14,7 +14,17 @@ import {
   X,
   Layers,
 } from 'lucide-react';
-import type { MaterialItem } from './types';
+import type { MaterialItem, FusionRow } from './types';
+
+/**
+ * Group of fusion rows for the same persona name.
+ */
+interface PersonaGroup {
+  name: string;
+  arcana: string;
+  level: number;
+  recipes: FusionRow[];
+}
 
 /**
  * Reusable component for rendering Persona Material Badges:
@@ -140,6 +150,27 @@ export default function App() {
 
     return result;
   }, [searchTerm, selectedArcana, sortField, sortAsc]);
+
+  // Group filtered rows by persona name for compact cards / clear separation
+  const personaGroups = useMemo(() => {
+    const groups: PersonaGroup[] = [];
+    const map = new Map<string, PersonaGroup>();
+
+    for (const row of filteredRows) {
+      if (!map.has(row.name)) {
+        const group: PersonaGroup = {
+          name: row.name,
+          arcana: row.arcana,
+          level: row.level,
+          recipes: [],
+        };
+        map.set(row.name, group);
+        groups.push(group);
+      }
+      map.get(row.name)!.recipes.push(row);
+    }
+    return groups;
+  }, [filteredRows]);
 
   // Copy fusion formula
   const handleCopy = (text: string, id: string) => {
@@ -339,7 +370,7 @@ export default function App() {
         </div>
 
         {/* ============================================================ */}
-        {/* MOBILE CARD VIEW (手机端自适应卡片列表，小屏幕时显示，md及以上隐藏) */}
+        {/* MOBILE CARD VIEW: 同名面具自动整合卡片（小屏幕展示，md以上隐藏） */}
         {/* ============================================================ */}
         <div className="block md:hidden space-y-3">
           {/* Mobile Top Stats Banner */}
@@ -347,86 +378,102 @@ export default function App() {
             <div className="flex items-center gap-1.5">
               <Layers className="w-3.5 h-3.5 text-[#e60012]" />
               <span className="text-xs font-black uppercase text-white tracking-wider">
-                面具配方列表
+                面具整合列表 ({personaGroups.length} 款面具)
               </span>
             </div>
             <div className="text-[11px] text-zinc-300 font-mono font-bold">
-              <strong className="text-white font-black">{filteredRows.length}</strong> / {FUSION_ROWS.length}
+              共 <strong className="text-[#e60012] font-black">{filteredRows.length}</strong> 条配方
             </div>
           </div>
 
-          {filteredRows.length === 0 ? (
+          {personaGroups.length === 0 ? (
             <div className="py-12 px-4 text-center bg-[#121218] shadow-[4px_4px_0_#000] p5-cut-card">
               <div className="text-sm text-white font-black mb-1">未检索到匹配的人格面具资料</div>
               <p className="text-xs text-zinc-400">请尝试切换搜索关键字或重置塔罗牌筛选</p>
             </div>
           ) : (
-            <div className="space-y-2.5">
-              {filteredRows.map((row) => (
+            <div className="space-y-3">
+              {personaGroups.map((group) => (
                 <div
-                  key={row.id}
-                  className="bg-[#121218] p-3 shadow-[4px_4px_0_#000] border border-white/5 relative"
+                  key={group.name}
+                  className="bg-[#121218] shadow-[4px_4px_0_#000] border border-white/10 relative overflow-hidden"
                 >
-                  {/* Card Header: Target Persona, Arcana, Level & Copy Button */}
-                  <div className="flex items-center justify-between gap-2 pb-2.5 border-b border-white/10">
+                  {/* Card Header: 整合后的单一面具标题头 (恢复原版缩进灰色分割线) */}
+                  <div className="flex items-center justify-between gap-2 px-3 pt-3 pb-2.5 border-b border-white/10 mx-0">
                     <div className="flex items-center gap-2 min-w-0">
                       <span className="inline-flex items-center justify-center px-1.5 py-0.5 text-[10px] font-black bg-white text-black p5-skew-l shadow-[1px_1px_0_#000] shrink-0">
-                        <span className="p5-unskew-l">{row.arcana}</span>
+                        <span className="p5-unskew-l">{group.arcana}</span>
                       </span>
-                      <span className="font-mono font-black text-white bg-black px-1 py-0.5 text-[10px] inline-block shadow-[1px_1px_0_#000] shrink-0">
-                        Lv.{row.level}
+                      <span className="font-mono font-black text-white bg-black px-1.5 py-0.5 text-[10px] inline-block shadow-[1px_1px_0_#000] shrink-0">
+                        Lv.{group.level}
                       </span>
                       <button
-                        onClick={() => setInspectedPersona(row.name)}
-                        className="inline-flex items-center justify-center px-2.5 py-0.5 bg-[#e60012] text-white font-black text-xs tracking-wide p5-skew-l shadow-[2px_2px_0_#000] truncate active:scale-95"
+                        onClick={() => setInspectedPersona(group.name)}
+                        className="inline-flex items-center justify-center px-2.5 py-1 bg-[#e60012] text-white font-black text-xs sm:text-sm tracking-wide p5-skew-l shadow-[2px_2px_0_#000] truncate active:scale-95 cursor-pointer"
                       >
                         <span className="p5-unskew-l truncate">
-                          {row.name}
+                          {group.name}
                         </span>
                       </button>
                     </div>
 
-                    <button
-                      onClick={() => handleCopy(row.text, row.id)}
-                      className="px-2 py-1 text-[11px] font-black text-white bg-black active:bg-white active:text-black shadow-[1px_1px_0_#000] shrink-0 inline-flex items-center gap-1 p5-skew-l"
-                    >
-                      <span className="p5-unskew-l flex items-center gap-1">
-                        {copiedId === row.id ? (
-                          <>
-                            <Check className="w-3 h-3 text-[#e60012]" />
-                            <span className="text-[#e60012]">已复制</span>
-                          </>
-                        ) : (
-                          <>
-                            <Copy className="w-3 h-3 text-zinc-400" />
-                            <span>复制</span>
-                          </>
-                        )}
-                      </span>
-                    </button>
+                    <span className="text-[10px] font-mono font-bold text-zinc-400 bg-black px-2 py-0.5 border border-white/10 shrink-0">
+                      {group.recipes.length} 种配方
+                    </span>
                   </div>
 
-                  {/* Card Body: Material Recipes with boosted level highlight */}
-                  <div className="pt-2">
-                    <div className="text-[10px] text-zinc-400 font-mono font-bold mb-1.5">
-                      合成素材:
-                    </div>
-                    <div className="flex flex-wrap items-center gap-1.5">
-                      {row.materials.map((mat, mIdx) => (
-                        <React.Fragment key={`${mat.name}-${mIdx}`}>
-                          {mIdx > 0 && (
-                            <span className="text-[#e60012] font-black text-xs px-0.5">
-                              ×
+                  {/* Card Body: 紧凑排列该面具下的多行材料配方 */}
+                  <div className="divide-y divide-white/5 bg-[#121218] px-3 py-1">
+                    {group.recipes.map((row, rIdx) => (
+                      <div
+                        key={row.id}
+                        className="py-2.5 flex items-center justify-between gap-2 hover:bg-white/[0.02] transition-colors"
+                      >
+                        {/* 左侧：序号与材料组合 */}
+                        <div className="min-w-0 flex-1">
+                          <div className="flex flex-wrap items-center gap-1.5">
+                            <span className="font-mono text-[9px] text-zinc-400 bg-black px-1 py-0.5 font-black shrink-0 border border-white/10">
+                              #{rIdx + 1}
                             </span>
-                          )}
-                          <MaterialBadge
-                            material={mat}
-                            onClick={() => setInspectedPersona(mat.name)}
-                            compact
-                          />
-                        </React.Fragment>
-                      ))}
-                    </div>
+                            {row.materials.map((mat, mIdx) => (
+                              <React.Fragment key={`${mat.name}-${mIdx}`}>
+                                {mIdx > 0 && (
+                                  <span className="text-[#e60012] font-black text-xs px-0.5">
+                                    ×
+                                  </span>
+                                )}
+                                <MaterialBadge
+                                  material={mat}
+                                  onClick={() => setInspectedPersona(mat.name)}
+                                  compact
+                                />
+                              </React.Fragment>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* 右侧：快速复制此行公式 */}
+                        <button
+                          onClick={() => handleCopy(row.text, row.id)}
+                          title="复制此合成公式"
+                          className="px-2 py-1 text-[10px] font-black text-white bg-black active:bg-white active:text-black shadow-[1px_1px_0_#000] shrink-0 inline-flex items-center gap-1 p5-skew-l cursor-pointer"
+                        >
+                          <span className="p5-unskew-l flex items-center gap-1">
+                            {copiedId === row.id ? (
+                              <>
+                                <Check className="w-3 h-3 text-[#e60012]" />
+                                <span className="text-[#e60012]">已复制</span>
+                              </>
+                            ) : (
+                              <>
+                                <Copy className="w-3 h-3 text-zinc-400" />
+                                <span>复制</span>
+                              </>
+                            )}
+                          </span>
+                        </button>
+                      </div>
+                    ))}
                   </div>
 
                 </div>
@@ -436,7 +483,7 @@ export default function App() {
         </div>
 
         {/* ============================================================ */}
-        {/* DESKTOP TABLE VIEW (电脑端保持高对比度表格，md及以上显示) */}
+        {/* DESKTOP TABLE VIEW: 电脑端表格增加面具组间隙与视觉辨识（md及以上显示） */}
         {/* ============================================================ */}
         <div className="hidden md:block relative bg-[#121218] shadow-[8px_8px_0_#000] p5-cut-card">
           
@@ -449,7 +496,7 @@ export default function App() {
               </span>
             </div>
             <div className="text-xs text-zinc-300 font-mono font-bold">
-              显示 <strong className="text-white font-black">{filteredRows.length}</strong> / 共 {FUSION_ROWS.length} 条记录
+              显示 <strong className="text-white font-black">{filteredRows.length}</strong> 条配方 · 涵盖 <strong className="text-[#e60012] font-black">{personaGroups.length}</strong> 款面具
             </div>
           </div>
 
@@ -507,7 +554,7 @@ export default function App() {
                 </tr>
               </thead>
 
-              <tbody className="divide-y divide-white/5 text-sm">
+              <tbody className="text-sm">
                 {filteredRows.length === 0 ? (
                   <tr>
                     <td colSpan={5} className="py-16 text-center text-zinc-400 font-medium">
@@ -516,83 +563,108 @@ export default function App() {
                     </td>
                   </tr>
                 ) : (
-                  filteredRows.map((row, idx) => (
-                    <tr
-                      key={row.id}
-                      className={`hover:bg-[#1c1c26] transition-colors group ${
-                        idx % 2 === 0 ? 'bg-[#101015]' : 'bg-[#14141b]'
-                      }`}
-                    >
-                      {/* Arcana */}
-                      <td className="py-2 px-3 font-black text-center whitespace-nowrap">
-                        <span className="inline-flex items-center justify-center px-2 py-0.5 text-xs font-black bg-white text-black p5-skew-l shadow-[2px_2px_0_#000]">
-                          <span className="p5-unskew-l">{row.arcana}</span>
-                        </span>
-                      </td>
+                  filteredRows.map((row, idx) => {
+                    const isFirstOfPersona = idx === 0 || filteredRows[idx - 1].name !== row.name;
+                    return (
+                      <tr
+                        key={row.id}
+                        className={`hover:bg-[#1c1c26] transition-colors group border-t border-white/5 ${
+                          idx % 2 === 0 ? 'bg-[#101015]' : 'bg-[#14141b]'
+                        }`}
+                      >
+                        {/* Arcana */}
+                        <td className="py-2 px-3 font-black text-center whitespace-nowrap">
+                          {isFirstOfPersona ? (
+                            <span className="inline-flex items-center justify-center px-2 py-0.5 text-xs font-black bg-white text-black p5-skew-l shadow-[2px_2px_0_#000]">
+                              <span className="p5-unskew-l">{row.arcana}</span>
+                            </span>
+                          ) : (
+                            <span className="text-[10px] text-zinc-500 font-bold">〃</span>
+                          )}
+                        </td>
 
-                      {/* Level */}
-                      <td className="py-2 px-2 text-center whitespace-nowrap">
-                        <span className="font-mono font-black text-white bg-black px-1.5 py-0.5 text-xs inline-block shadow-[1px_1px_0_#000]">
-                          Lv.{row.level}
-                        </span>
-                      </td>
+                        {/* Level */}
+                        <td className="py-2 px-2 text-center whitespace-nowrap">
+                          {isFirstOfPersona ? (
+                            <span className="font-mono font-black text-white bg-black px-1.5 py-0.5 text-xs inline-block shadow-[1px_1px_0_#000]">
+                              Lv.{row.level}
+                            </span>
+                          ) : (
+                            <span className="font-mono text-zinc-500 text-xs">
+                              {row.level}
+                            </span>
+                          )}
+                        </td>
 
-                      {/* Persona Name */}
-                      <td className="py-2 px-4 text-center whitespace-nowrap">
-                        <button
-                          onClick={() => setInspectedPersona(row.name)}
-                          className="inline-flex items-center justify-center px-3 py-1 bg-[#e60012] hover:bg-white text-white hover:text-black font-black text-xs sm:text-sm tracking-wide p5-skew-l shadow-[3px_3px_0_#000] transition-all hover:scale-105 cursor-pointer"
-                        >
-                          <span className="p5-unskew-l">
-                            {row.name}
-                          </span>
-                        </button>
-                      </td>
+                        {/* Persona Name */}
+                        <td className="py-2 px-4 text-center whitespace-nowrap">
+                          {isFirstOfPersona ? (
+                            <button
+                              onClick={() => setInspectedPersona(row.name)}
+                              className="inline-flex items-center justify-center px-3 py-1 bg-[#e60012] hover:bg-white text-white hover:text-black font-black text-xs sm:text-sm tracking-wide p5-skew-l shadow-[3px_3px_0_#000] transition-all hover:scale-105 cursor-pointer"
+                            >
+                              <span className="p5-unskew-l">
+                                {row.name}
+                              </span>
+                            </button>
+                          ) : (
+                            <button
+                              onClick={() => setInspectedPersona(row.name)}
+                              className="text-xs text-zinc-400 hover:text-white font-bold transition-colors cursor-pointer"
+                            >
+                              {row.name}
+                            </button>
+                          )}
+                        </td>
 
-                      {/* Materials List */}
-                      <td className="py-2 px-4 text-left">
-                        <div className="flex flex-wrap items-center gap-1.5">
-                          {row.materials.map((mat, mIdx) => (
-                            <React.Fragment key={`${mat.name}-${mIdx}`}>
-                              {mIdx > 0 && (
-                                <span className="text-[#e60012] font-black text-sm px-0.5">
-                                  ×
-                                </span>
+                        {/* Materials List */}
+                        <td className="py-2 px-4 text-left">
+                          <div className="flex flex-wrap items-center gap-1.5">
+                            <span className="text-[10px] font-mono text-zinc-500 mr-0.5">
+                              #{personaGroups.find(g => g.name === row.name)?.recipes.findIndex(r => r.id === row.id)! + 1}
+                            </span>
+                            {row.materials.map((mat, mIdx) => (
+                              <React.Fragment key={`${mat.name}-${mIdx}`}>
+                                {mIdx > 0 && (
+                                  <span className="text-[#e60012] font-black text-sm px-0.5">
+                                    ×
+                                  </span>
+                                )}
+                                <MaterialBadge
+                                  material={mat}
+                                  onClick={() => setInspectedPersona(mat.name)}
+                                />
+                              </React.Fragment>
+                            ))}
+                          </div>
+                        </td>
+
+                        {/* Copy Action */}
+                        <td className="py-2 px-3 text-right whitespace-nowrap">
+                          <button
+                            onClick={() => handleCopy(row.text, row.id)}
+                            title="复制合成公式"
+                            className="px-2 py-0.5 text-xs font-black text-white hover:text-black bg-black hover:bg-white shadow-[2px_2px_0_#000] transition-colors inline-flex items-center gap-1 p5-skew-l cursor-pointer"
+                          >
+                            <span className="p5-unskew-l flex items-center gap-1">
+                              {copiedId === row.id ? (
+                                <>
+                                  <Check className="w-3.5 h-3.5 text-[#e60012]" />
+                                  <span className="text-[#e60012] text-[11px]">已复制</span>
+                                </>
+                              ) : (
+                                <>
+                                  <Copy className="w-3 h-3 text-zinc-300" />
+                                  <span className="text-[11px]">复制</span>
+                                </>
                               )}
-                              <MaterialBadge
-                                material={mat}
-                                onClick={() => setInspectedPersona(mat.name)}
-                              />
-                            </React.Fragment>
-                          ))}
-                        </div>
-                      </td>
+                            </span>
+                          </button>
+                        </td>
 
-                      {/* Copy Action */}
-                      <td className="py-2 px-3 text-right whitespace-nowrap">
-                        <button
-                          onClick={() => handleCopy(row.text, row.id)}
-                          title="复制合成公式"
-                          className="px-2 py-0.5 text-xs font-black text-white hover:text-black bg-black hover:bg-white shadow-[2px_2px_0_#000] transition-colors inline-flex items-center gap-1 p5-skew-l cursor-pointer"
-                        >
-                          <span className="p5-unskew-l flex items-center gap-1">
-                            {copiedId === row.id ? (
-                              <>
-                                <Check className="w-3.5 h-3.5 text-[#e60012]" />
-                                <span className="text-[#e60012] text-[11px]">已复制</span>
-                              </>
-                            ) : (
-                              <>
-                                <Copy className="w-3 h-3 text-zinc-300" />
-                                <span className="text-[11px]">复制</span>
-                              </>
-                            )}
-                          </span>
-                        </button>
-                      </td>
-
-                    </tr>
-                  ))
+                      </tr>
+                    );
+                  })
                 )}
               </tbody>
             </table>
@@ -602,7 +674,7 @@ export default function App() {
           <div className="bg-[#0b0b0e] px-5 py-2.5 flex items-center justify-between text-xs text-zinc-300 border-t border-white/10">
             <div className="flex items-center gap-2">
               <span className="w-2 h-2 bg-[#e60012] inline-block" />
-              <span>提示：材料带有黄色高亮表示该配方需提前提升该面具等级至所标数值</span>
+              <span>提示：首行红色斜角按钮标识该面具分组；黄色高亮代表合体要求等级需提前练级</span>
             </div>
             <div className="font-mono font-bold text-zinc-400">
               PERSONA 5 STRIKERS COMPENDIUM
