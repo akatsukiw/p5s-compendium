@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import {
   FUSION_ROWS,
   PERSONA_META,
@@ -13,8 +13,14 @@ import {
   Check,
   X,
   Layers,
+  Bookmark,
 } from 'lucide-react';
 import type { MaterialItem, FusionRow } from './types';
+
+/**
+ * Level quick navigation index tiers (Lv 5, 10, 15, 20 ... 60, 67, etc.)
+ */
+const LEVEL_INDEX_TIERS = [1, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 67];
 
 /**
  * Group of fusion rows for the same persona name.
@@ -28,8 +34,8 @@ interface PersonaGroup {
 
 /**
  * Reusable component for rendering Persona Material Badges:
- * - When requiredLevel > baseLevel, highlights the level badge with P5 signature yellow (#f2c300),
- *   giving visual alert that this formula requires training the material to a higher level.
+ * - When requiredLevel > baseLevel, elegantly styles the level text (e.g. bold coral-gold text with asterisk)
+ *   instead of a jarring yellow background block, harmonizing with P5 dark/red aesthetics.
  * - Shows clear hover/title tooltip explaining the required level vs original base level.
  */
 function MaterialBadge({
@@ -56,19 +62,19 @@ function MaterialBadge({
     <button
       onClick={onClick}
       title={tooltip}
-      className={`inline-flex items-center gap-1 transition-all shadow-[1px_1px_0_#000] p5-skew-l group/mat cursor-pointer ${
-        compact ? 'px-1.5 py-0.5' : 'px-2 py-0.5'
+      className={`inline-flex items-center transition-all shadow-[1px_1px_0_#000] p5-skew-l group/mat cursor-pointer whitespace-nowrap shrink-0 ${
+        compact ? 'px-1 py-0.5 gap-0.5' : 'px-1.5 py-0.5 gap-1'
       } ${
         isHighlighted
-          ? 'bg-[#e60012] text-white font-black'
-          : 'bg-black hover:bg-[#e60012] text-white hover:text-white'
+          ? 'bg-[#e60012] text-white font-black ring-1 ring-white/40'
+          : 'bg-[#0f0f15] hover:bg-[#e60012] text-white border border-white/10'
       }`}
     >
       <span className="p5-unskew-l flex items-center gap-1 text-[11px] sm:text-xs">
         {/* Arcana Tag */}
         {matMeta && (
           <span
-            className={`px-1 py-0 text-[9px] sm:text-[10px] font-black ${
+            className={`px-1 py-0 text-[9px] sm:text-[10px] font-black shrink-0 ${
               isHighlighted ? 'bg-black text-white' : 'bg-white text-black'
             }`}
           >
@@ -85,13 +91,17 @@ function MaterialBadge({
           {material.name}
         </span>
 
-        {/* Level Tag: P5R signature yellow tag if boosted, else red/white */}
+        {/* Level Tag: Refined and unified style */}
         {isLevelBoosted ? (
           <span
-            className="font-mono font-black text-[10px] sm:text-[11px] px-1 py-0 bg-[#f2c300] text-black shadow-[1px_1px_0_#000]"
+            className={`font-mono font-black text-[10px] sm:text-[11px] tracking-tight ${
+              isHighlighted
+                ? 'text-[#ffe57f]'
+                : 'text-[#f6c344] group-hover/mat:text-[#fffb00]'
+            }`}
             title={`合体要求 Lv.${reqLvl} (初始原始等级 Lv.${baseLvl})`}
           >
-            Lv{reqLvl}*
+            Lv{reqLvl}<span className="text-[10px] font-bold text-[#f6c344] group-hover/mat:text-[#fffb00] ml-0.5">▲</span>
           </span>
         ) : (
           <span
@@ -118,6 +128,12 @@ export default function App() {
 
   // Quick detail modal state when clicking any persona name
   const [inspectedPersona, setInspectedPersona] = useState<string | null>(null);
+
+  // Active level highlight for jump animation
+  const [activeLevelHighlight, setActiveLevelHighlight] = useState<number | null>(null);
+
+  // Ref to the desktop table scrollable container
+  const tableContainerRef = useRef<HTMLDivElement>(null);
 
   // Filter and sort for the main list / table
   const filteredRows = useMemo(() => {
@@ -186,6 +202,50 @@ export default function App() {
     } else {
       setSortField(field);
       setSortAsc(true);
+    }
+  };
+
+  // Jump/scroll to persona row or card near target level
+  const handleScrollToLevel = (targetLevel: number) => {
+    // If current sort is not by level ascending, switch to level ascending for predictable navigation
+    if (sortField !== 'level' || !sortAsc) {
+      setSortField('level');
+      setSortAsc(true);
+    }
+
+    // Trigger visual pulse for this level
+    setActiveLevelHighlight(targetLevel);
+    setTimeout(() => setActiveLevelHighlight(null), 2000);
+
+    // Find closest persona in filteredRows
+    if (filteredRows.length === 0) return;
+
+    // Find the first row whose level >= targetLevel, or fallback to the closest one
+    let targetRow = filteredRows.find((r) => r.level >= targetLevel);
+    if (!targetRow) {
+      targetRow = filteredRows[filteredRows.length - 1];
+    }
+
+    const rowId = `table-row-${targetRow.id}`;
+    const cardId = `mobile-card-${targetRow.name}`;
+
+    // Desktop table internal scrolling
+    const tableEl = document.getElementById(rowId);
+    const container = tableContainerRef.current;
+    if (tableEl && container) {
+      const topOffset = tableEl.offsetTop - 50; // offset for sticky thead
+      container.scrollTo({
+        top: Math.max(0, topOffset),
+        behavior: 'smooth',
+      });
+    }
+
+    // Mobile card or full page scroll fallback
+    const cardEl = document.getElementById(cardId);
+    if (cardEl && window.innerWidth < 768) {
+      cardEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    } else if (tableEl && window.innerWidth >= 768 && !container) {
+      tableEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
   };
 
@@ -357,14 +417,31 @@ export default function App() {
             })}
           </div>
 
-          {/* Level highlight explanation tip */}
-          <div className="mt-2.5 pt-2 border-t border-white/5 flex items-center gap-2 text-[11px] text-zinc-400">
-            <span className="px-1.5 py-0 bg-[#f2c300] text-black font-mono font-black text-[10px] shadow-[1px_1px_0_#000]">
-              Lv.*
+          {/* Level Quick Index Bar: 像塔罗牌一样，点击等级快速定位跳到对应等级的面具 */}
+          <div className="mt-2.5 pt-2 sm:pt-2.5 border-t border-white/10 flex items-center gap-1.5 flex-wrap overflow-x-auto pr-1 sm:pr-0">
+            <span className="text-[10px] sm:text-[11px] text-zinc-300 font-black uppercase mr-1 flex items-center gap-1 shrink-0" title="金色 Lv.▲ 标记代表合体要求等级高于图鉴初始等级，需预先练级">
+              <Bookmark className="w-3 h-3 text-[#e60012]" /> 等级索引:
+              <span className="ml-1 text-[10px] font-mono text-[#f6c344] font-bold cursor-help bg-black/60 px-1 py-0.2 border border-[#f6c344]/40" title="金色 Lv.▲ 标记代表合体要求等级高于图鉴初始等级，需预先练级">Lv.▲需练级</span>
             </span>
-            <span>
-              黄色高亮代表<strong>合体要求等级</strong>高于图鉴基础等级（需预先练级），鼠标悬停可查看原始等级。
-            </span>
+            {LEVEL_INDEX_TIERS.map((tier) => {
+              const isActive = activeLevelHighlight === tier;
+              return (
+                <button
+                  key={tier}
+                  onClick={() => handleScrollToLevel(tier)}
+                  title={`快速跳转至 Lv.${tier} 附近的面具`}
+                  className={`px-1.5 sm:px-2 py-0.5 text-[11px] sm:text-xs font-mono font-black transition-all p5-skew-l shadow-[1.5px_1.5px_0_#000] shrink-0 cursor-pointer active:scale-95 ${
+                    isActive
+                      ? 'bg-[#f2c300] text-black ring-2 ring-white scale-110'
+                      : 'bg-[#1e1e28] text-zinc-200 hover:bg-[#e60012] hover:text-white border border-white/15'
+                  }`}
+                >
+                  <span className="p5-unskew-l">
+                    Lv{tier}
+                  </span>
+                </button>
+              );
+            })}
           </div>
 
         </div>
@@ -393,11 +470,20 @@ export default function App() {
             </div>
           ) : (
             <div className="space-y-3">
-              {personaGroups.map((group) => (
-                <div
-                  key={group.name}
-                  className="bg-[#121218] shadow-[4px_4px_0_#000] border border-white/10 relative overflow-hidden"
-                >
+              {personaGroups.map((group) => {
+                const isGroupLevelActive = activeLevelHighlight !== null && group.level >= activeLevelHighlight && group.level < activeLevelHighlight + 5;
+                return (
+                  <div
+                    key={group.name}
+                    id={`mobile-card-${group.name}`}
+                    data-persona={group.name}
+                    data-level={group.level}
+                    className={`bg-[#121218] shadow-[4px_4px_0_#000] border relative overflow-hidden transition-all duration-300 ${
+                      isGroupLevelActive
+                        ? 'border-[#f2c300] ring-2 ring-[#f2c300]/40'
+                        : 'border-white/10'
+                    }`}
+                  >
                   {/* Card Header: 整合后的单一面具标题头 (恢复原版缩进灰色分割线) */}
                   <div className="flex items-center justify-between gap-2 px-3 pt-3 pb-2.5 border-b border-white/10 mx-0">
                     <div className="flex items-center gap-2 min-w-0">
@@ -423,22 +509,22 @@ export default function App() {
                   </div>
 
                   {/* Card Body: 紧凑排列该面具下的多行材料配方 */}
-                  <div className="divide-y divide-white/5 bg-[#121218] px-3 py-1">
+                  <div className="divide-y divide-white/5 bg-[#121218] px-2 sm:px-3 py-0.5">
                     {group.recipes.map((row, rIdx) => (
                       <div
                         key={row.id}
-                        className="py-2.5 flex items-center justify-between gap-2 hover:bg-white/[0.02] transition-colors"
+                        className="py-1.5 flex items-center justify-between gap-1.5 hover:bg-white/[0.02] transition-colors"
                       >
-                        {/* 左侧：序号与材料组合 */}
-                        <div className="min-w-0 flex-1">
-                          <div className="flex flex-wrap items-center gap-1.5">
+                        {/* 左侧：序号与材料组合 (横向同行不折行，材料两端对齐紧凑，长名称不折断) */}
+                        <div className="min-w-0 flex-1 py-0.5">
+                          <div className="flex flex-wrap items-center gap-1">
                             <span className="font-mono text-[9px] text-zinc-400 bg-black px-1 py-0.5 font-black shrink-0 border border-white/10">
                               #{rIdx + 1}
                             </span>
                             {row.materials.map((mat, mIdx) => (
                               <React.Fragment key={`${mat.name}-${mIdx}`}>
                                 {mIdx > 0 && (
-                                  <span className="text-[#e60012] font-black text-xs px-0.5">
+                                  <span className="text-[#e60012] font-black text-xs px-0.5 shrink-0 select-none">
                                     ×
                                   </span>
                                 )}
@@ -452,23 +538,17 @@ export default function App() {
                           </div>
                         </div>
 
-                        {/* 右侧：快速复制此行公式 */}
+                        {/* 右侧：纯图标小巧复制按钮，不占文字宽度 */}
                         <button
                           onClick={() => handleCopy(row.text, row.id)}
-                          title="复制此合成公式"
-                          className="px-2 py-1 text-[10px] font-black text-white bg-black active:bg-white active:text-black shadow-[1px_1px_0_#000] shrink-0 inline-flex items-center gap-1 p5-skew-l cursor-pointer"
+                          title="复制合成公式"
+                          className="w-6 h-6 shrink-0 flex items-center justify-center text-white bg-black hover:bg-white hover:text-black active:bg-white active:text-black shadow-[1px_1px_0_#000] p5-skew-l cursor-pointer border border-white/10 transition-colors"
                         >
-                          <span className="p5-unskew-l flex items-center gap-1">
+                          <span className="p5-unskew-l flex items-center justify-center">
                             {copiedId === row.id ? (
-                              <>
-                                <Check className="w-3 h-3 text-[#e60012]" />
-                                <span className="text-[#e60012]">已复制</span>
-                              </>
+                              <Check className="w-3.5 h-3.5 text-[#e60012]" />
                             ) : (
-                              <>
-                                <Copy className="w-3 h-3 text-zinc-400" />
-                                <span>复制</span>
-                              </>
+                              <Copy className="w-3.5 h-3.5 text-zinc-300" />
                             )}
                           </span>
                         </button>
@@ -477,7 +557,8 @@ export default function App() {
                   </div>
 
                 </div>
-              ))}
+              );
+              })}
             </div>
           )}
         </div>
@@ -501,7 +582,10 @@ export default function App() {
           </div>
 
           {/* 表格专属滚动区域：最大高度 72vh，表头 sticky top-0 完美冻结在表体正上方 */}
-          <div className="overflow-x-auto max-h-[72vh] overflow-y-auto">
+          <div
+            ref={tableContainerRef}
+            className="overflow-x-auto max-h-[80vh] overflow-y-auto scroll-smooth"
+          >
             <table className="w-full text-left border-collapse table-fixed">
               <colgroup>
                 <col className="w-20" />
@@ -565,11 +649,19 @@ export default function App() {
                 ) : (
                   filteredRows.map((row, idx) => {
                     const isFirstOfPersona = idx === 0 || filteredRows[idx - 1].name !== row.name;
+                    const isRowLevelActive = activeLevelHighlight !== null && row.level >= activeLevelHighlight && row.level < activeLevelHighlight + 5;
                     return (
                       <tr
                         key={row.id}
-                        className={`hover:bg-[#1c1c26] transition-colors group border-t border-white/5 ${
-                          idx % 2 === 0 ? 'bg-[#101015]' : 'bg-[#14141b]'
+                        id={`table-row-${row.id}`}
+                        data-persona={row.name}
+                        data-level={row.level}
+                        className={`transition-colors duration-300 group border-t border-white/5 ${
+                          isRowLevelActive
+                            ? 'bg-[#f2c300]/10 hover:bg-[#f2c300]/20'
+                            : idx % 2 === 0
+                            ? 'bg-[#101015] hover:bg-[#1c1c26]'
+                            : 'bg-[#14141b] hover:bg-[#1c1c26]'
                         }`}
                       >
                         {/* Arcana */}
@@ -671,13 +763,12 @@ export default function App() {
           </div>
 
           {/* Table Bottom Status */}
-          <div className="bg-[#0b0b0e] px-5 py-2.5 flex items-center justify-between text-xs text-zinc-300 border-t border-white/10">
-            <div className="flex items-center gap-2">
-              <span className="w-2 h-2 bg-[#e60012] inline-block" />
-              <span>提示：首行红色斜角按钮标识该面具分组；黄色高亮代表合体要求等级需提前练级</span>
-            </div>
-            <div className="font-mono font-bold text-zinc-400">
+          <div className="bg-[#0b0b0e] px-5 py-1.5 flex items-center justify-between text-[11px] text-zinc-500 border-t border-white/10">
+            <div className="font-mono font-bold">
               PERSONA 5 STRIKERS COMPENDIUM
+            </div>
+            <div className="font-mono">
+              ALL DATA SYNCED
             </div>
           </div>
 
