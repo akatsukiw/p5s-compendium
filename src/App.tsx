@@ -74,7 +74,7 @@ function MaterialBadge({
         {/* Arcana Tag */}
         {matMeta && (
           <span
-            className={`px-0.5 sm:px-1 py-0 text-[9px] sm:text-[10.5px] font-black shrink-0 leading-tight ${
+            className={`px-0.5 sm:px-1 py-0 text-[9px] sm:text-[10.5px] font-bold shrink-0 leading-tight ${
               isHighlighted ? 'bg-black text-white' : 'bg-white text-black'
             }`}
           >
@@ -82,9 +82,9 @@ function MaterialBadge({
           </span>
         )}
 
-        {/* Persona Name */}
+        {/* Persona Name (700 weight for optimal readability) */}
         <span
-          className={`font-black tracking-tight ${
+          className={`font-bold tracking-tight ${
             isHighlighted ? 'text-white' : 'text-zinc-100 group-hover/mat:text-white'
           }`}
         >
@@ -94,7 +94,7 @@ function MaterialBadge({
         {/* Level Tag: Refined and unified style */}
         {isLevelBoosted ? (
           <span
-            className={`font-mono font-black text-[10.5px] sm:text-xs tracking-tighter ${
+            className={`font-mono font-bold text-[10.5px] sm:text-xs tracking-tighter ${
               isHighlighted
                 ? 'text-[#ffe57f]'
                 : 'text-[#f6c344] group-hover/mat:text-[#fffb00]'
@@ -105,7 +105,7 @@ function MaterialBadge({
           </span>
         ) : (
           <span
-            className={`font-mono font-black text-[10.5px] sm:text-xs tracking-tight ${
+            className={`font-mono font-bold text-[10.5px] sm:text-xs tracking-tight ${
               isHighlighted
                 ? 'text-white'
                 : 'text-[#e60012] group-hover/mat:text-white'
@@ -491,7 +491,7 @@ export default function App() {
                       </span>
                       <button
                         onClick={() => setInspectedPersona(group.name)}
-                        className="inline-flex items-center justify-center px-2.5 py-1 bg-[#e60012] text-white font-black text-xs sm:text-sm tracking-wide p5-skew-l shadow-[2px_2px_0_#000] truncate active:scale-95 cursor-pointer"
+                        className="inline-flex items-center justify-center px-2.5 py-1 bg-[#e60012] text-white font-extrabold text-xs sm:text-sm tracking-wide p5-skew-l shadow-[2px_2px_0_#000] truncate active:scale-95 cursor-pointer"
                       >
                         <span className="p5-unskew-l truncate">
                           {group.name}
@@ -601,7 +601,7 @@ export default function App() {
 
               {/* 冻结表头：sticky top-0 纯黑高对比度底色 */}
               <thead className="sticky top-0 z-20 shadow-[0_4px_6px_rgba(0,0,0,0.9)]">
-                <tr className="bg-[#0b0b0e] text-white text-xs font-black uppercase tracking-wider border-b-2 border-white/20">
+                <tr className="bg-[#0b0b0e] text-white text-xs font-bold uppercase tracking-wider border-b-2 border-white/20">
                   <th
                     onClick={() => handleSortToggle('arcana')}
                     className="py-2.5 px-3 text-center cursor-pointer hover:text-[#e60012] transition-colors select-none"
@@ -669,9 +669,9 @@ export default function App() {
                         }`}
                       >
                         {/* Arcana */}
-                        <td className="py-2 px-3 font-black text-center whitespace-nowrap">
+                        <td className="py-2 px-3 font-bold text-center whitespace-nowrap">
                           {isFirstOfPersona ? (
-                            <span className="inline-flex items-center justify-center px-2 py-0.5 text-xs font-black bg-white text-black p5-skew-l shadow-[2px_2px_0_#000]">
+                            <span className="inline-flex items-center justify-center px-2 py-0.5 text-xs font-bold bg-white text-black p5-skew-l shadow-[2px_2px_0_#000]">
                               <span className="p5-unskew-l">{row.arcana}</span>
                             </span>
                           ) : (
@@ -682,7 +682,7 @@ export default function App() {
                         {/* Level */}
                         <td className="py-2 px-2 text-center whitespace-nowrap">
                           {isFirstOfPersona ? (
-                            <span className="font-mono font-black text-white bg-black px-1.5 py-0.5 text-xs inline-block shadow-[1px_1px_0_#000]">
+                            <span className="font-mono font-bold text-white bg-black px-1.5 py-0.5 text-xs inline-block shadow-[1px_1px_0_#000]">
                               Lv.{row.level}
                             </span>
                           ) : (
@@ -697,7 +697,7 @@ export default function App() {
                           {isFirstOfPersona ? (
                             <button
                               onClick={() => setInspectedPersona(row.name)}
-                              className="inline-flex items-center justify-center px-3 py-1 bg-[#e60012] hover:bg-white text-white hover:text-black font-black text-xs sm:text-sm tracking-wide p5-skew-l shadow-[3px_3px_0_#000] transition-all hover:scale-105 cursor-pointer"
+                              className="inline-flex items-center justify-center px-3 py-1 bg-[#e60012] hover:bg-white text-white hover:text-black font-extrabold text-xs sm:text-sm tracking-wide p5-skew-l shadow-[3px_3px_0_#000] transition-all hover:scale-105 cursor-pointer"
                             >
                               <span className="p5-unskew-l">
                                 {row.name}
@@ -740,7 +740,7 @@ export default function App() {
                           <button
                             onClick={() => handleCopy(row.text, row.id)}
                             title="复制合成公式"
-                            className="px-2 py-0.5 text-xs font-black text-white hover:text-black bg-black hover:bg-white shadow-[2px_2px_0_#000] transition-colors inline-flex items-center gap-1 p5-skew-l cursor-pointer"
+                            className="px-2 py-0.5 text-xs font-bold text-white hover:text-black bg-black hover:bg-white shadow-[2px_2px_0_#000] transition-colors inline-flex items-center gap-1 p5-skew-l cursor-pointer"
                           >
                             <span className="p5-unskew-l flex items-center gap-1">
                               {copiedId === row.id ? (
@@ -891,7 +891,7 @@ export default function App() {
                             )}
                             <button
                               onClick={() => setInspectedPersona(r.name)}
-                              className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-[#e60012] active:bg-white text-white active:text-black font-black text-xs p5-skew-l shadow-[2px_2px_0_#000] transition-colors cursor-pointer"
+                              className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-[#e60012] active:bg-white text-white active:text-black font-extrabold text-xs p5-skew-l shadow-[2px_2px_0_#000] transition-colors cursor-pointer"
                             >
                               <span className="p5-unskew-l flex items-center gap-1">
                                 <span>{r.name}</span>
