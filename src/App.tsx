@@ -70,11 +70,11 @@ function MaterialBadge({
           : 'bg-[#0f0f15] hover:bg-[#e60012] text-white border border-white/10'
       }`}
     >
-      <span className={`p5-unskew-l flex items-center ${compact ? 'gap-0.5 text-[10px] sm:text-xs' : 'gap-1 text-[11px] sm:text-xs'}`}>
+      <span className={`p5-unskew-l flex items-center leading-none ${compact ? 'gap-0.5 text-[11px] sm:text-[13px]' : 'gap-1 text-xs sm:text-[14px]'}`}>
         {/* Arcana Tag */}
         {matMeta && (
           <span
-            className={`px-0.5 sm:px-1 py-0 text-[8.5px] sm:text-[10px] font-black shrink-0 leading-tight ${
+            className={`px-0.5 sm:px-1 py-0 text-[9px] sm:text-[10.5px] font-black shrink-0 leading-tight ${
               isHighlighted ? 'bg-black text-white' : 'bg-white text-black'
             }`}
           >
@@ -84,7 +84,7 @@ function MaterialBadge({
 
         {/* Persona Name */}
         <span
-          className={`font-bold tracking-tight ${
+          className={`font-black tracking-tight ${
             isHighlighted ? 'text-white' : 'text-zinc-100 group-hover/mat:text-white'
           }`}
         >
@@ -94,18 +94,18 @@ function MaterialBadge({
         {/* Level Tag: Refined and unified style */}
         {isLevelBoosted ? (
           <span
-            className={`font-mono font-black text-[9.5px] sm:text-[11px] tracking-tighter ${
+            className={`font-mono font-black text-[10.5px] sm:text-xs tracking-tighter ${
               isHighlighted
                 ? 'text-[#ffe57f]'
                 : 'text-[#f6c344] group-hover/mat:text-[#fffb00]'
             }`}
             title={`合体要求 Lv.${reqLvl} (初始原始等级 Lv.${baseLvl})`}
           >
-            Lv{reqLvl}<span className="text-[9px] font-bold text-[#f6c344] group-hover/mat:text-[#fffb00] ml-0.2">▲</span>
+            Lv{reqLvl}<span className="text-[9.5px] font-bold text-[#f6c344] group-hover/mat:text-[#fffb00] ml-0.2">▲</span>
           </span>
         ) : (
           <span
-            className={`font-mono font-black text-[9.5px] sm:text-[11px] tracking-tight ${
+            className={`font-mono font-black text-[10.5px] sm:text-xs tracking-tight ${
               isHighlighted
                 ? 'text-white'
                 : 'text-[#e60012] group-hover/mat:text-white'
