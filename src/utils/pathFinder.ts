@@ -72,12 +72,14 @@ function getGraph(): Map<string, Edge[]> {
  * Supports:
  * - strategy = 'bfs': returns top 1 shortest path
  * - strategy = 'all': returns top K diverse shortest/near-shortest paths
+ * - baseLevelOnly = true: strictly filters out recipes where material level > base level (no grinding required)
  */
 export function findFusionPath(
   startName: string,
   targetName: string,
   strategy: 'bfs' | 'all' = 'all',
-  maxResults: number = 4
+  maxResults: number = 4,
+  baseLevelOnly: boolean = false
 ): { paths: FusionPathResult[]; durationMs: number; nodeCount: number; edgeCount: number } {
   const t0 = performance.now();
   const graph = getGraph();
@@ -101,6 +103,12 @@ export function findFusionPath(
 
     const transitions = graph.get(current) || [];
     for (const edge of transitions) {
+      // If baseLevelOnly is requested, strictly exclude edges that require leveled-up materials
+      if (baseLevelOnly) {
+        const hasBoostedMaterial = edge.materials.some(m => m.requiredLevel > m.baseLevel);
+        if (hasBoostedMaterial) continue;
+      }
+
       // Prevent internal cycles in the same chain
       if (steps.some(s => s.target === edge.target || s.from.name === edge.target)) {
         continue;
@@ -152,4 +160,11 @@ export function findFusionPath(
 
   const t1 = performance.now();
   return { paths: foundPaths, durationMs: t1 - t0, nodeCount, edgeCount };
+}
+
+export function isPathBaseLevelOnly(path: FusionPathResult): boolean {
+  return path.steps.every(s =>
+    s.from.requiredLevel <= s.from.baseLevel &&
+    s.otherMaterials.every(m => m.requiredLevel <= m.baseLevel)
+  );
 }
