@@ -308,42 +308,70 @@ export function PathFinderModal({
                   </span>
                 </div>
 
-                {/* Tab Switchers: All Paths vs Pure Base-Level (No Grinding) */}
-                <div className="flex items-center gap-1.5 bg-[#060b14] p-1 border border-white/10 self-start sm:self-auto">
+                {/* High-Affordance Tab Switchers: Obvious interactive physical buttons */}
+                <div className="flex items-center gap-1 sm:gap-1.5 bg-[#060912] p-1 border-2 border-white/20 shadow-[2px_2px_0_#000] self-start sm:self-auto flex-nowrap shrink-0">
+                  <span className="text-[10px] font-mono text-zinc-400 font-bold px-1.5 hidden md:inline-flex items-center gap-1 select-none">
+                    <span className="w-1.5 h-1.5 bg-[#e60012] rounded-full inline-block" />
+                    <span>方案切换:</span>
+                  </span>
+
+                  {/* 全部方案 按钮 */}
                   <button
                     type="button"
                     onClick={() => setActiveTab('all')}
-                    className={`px-2.5 py-1 text-xs font-black p5-skew-l transition-all cursor-pointer flex items-center gap-1.5 ${
+                    className={`px-2.5 sm:px-3 py-1 sm:py-1.5 text-xs font-black p5-skew-l transition-all cursor-pointer flex items-center gap-1 sm:gap-1.5 active:translate-x-0.5 active:translate-y-0.5 active:scale-95 group shrink-0 ${
                       activeTab === 'all'
-                        ? 'bg-[#e60012] text-white shadow-[1px_1px_0_#000]'
-                        : 'text-zinc-400 hover:text-white'
+                        ? 'bg-[#e60012] text-white border-2 border-[#ff4d59] shadow-[2px_2px_0_#000]'
+                        : 'bg-[#12141f] hover:bg-[#1a1d2e] text-zinc-300 hover:text-white border-2 border-white/15 hover:border-white/40 shadow-[1px_1px_0_#000]'
                     }`}
                   >
                     <span className="p5-unskew-l flex items-center gap-1">
+                      <span className="font-mono text-[10px]">
+                        {activeTab === 'all' ? '●' : '○'}
+                      </span>
                       <span>全部方案</span>
                       {hasCalculated && (
-                        <span className={`text-[9.5px] px-1 py-0 font-mono ${activeTab === 'all' ? 'bg-black text-white' : 'bg-white/10 text-zinc-300'}`}>
+                        <span
+                          className={`text-[9.5px] sm:text-[10px] px-1 sm:px-1.5 py-0.2 font-mono font-black ${
+                            activeTab === 'all'
+                              ? 'bg-black text-white shadow-[1px_1px_0_#000]'
+                              : 'bg-black/60 text-zinc-400 border border-white/10 group-hover:text-white'
+                          }`}
+                        >
                           {allPaths.length}
                         </span>
                       )}
                     </span>
                   </button>
 
+                  {/* 仅初始等级 按钮 */}
                   <button
                     type="button"
                     onClick={() => setActiveTab('baseOnly')}
-                    className={`px-2.5 py-1 text-xs font-black p5-skew-l transition-all cursor-pointer flex items-center gap-1.5 ${
+                    className={`px-2.5 sm:px-3 py-1 sm:py-1.5 text-xs font-black p5-skew-l transition-all cursor-pointer flex items-center gap-1 sm:gap-1.5 active:translate-x-0.5 active:translate-y-0.5 active:scale-95 group shrink-0 ${
                       activeTab === 'baseOnly'
-                        ? 'bg-[#107c41] text-white shadow-[1px_1px_0_#000]'
-                        : 'text-zinc-400 hover:text-white'
+                        ? 'bg-[#107c41] text-white border-2 border-[#23c36b] shadow-[2px_2px_0_#000]'
+                        : 'bg-[#12141f] hover:bg-[#1a1d2e] text-zinc-300 hover:text-white border-2 border-white/15 hover:border-[#107c41]/60 shadow-[1px_1px_0_#000]'
                     }`}
-                    title="排除所有要求练级的材料，仅使用图鉴初始等级的材料"
+                    title="仅使用图鉴初始等级的材料，排除所有要求练级的前置材料"
                   >
                     <span className="p5-unskew-l flex items-center gap-1">
-                      <Sparkles className="w-3 h-3 text-[#ffe57f]" />
-                      <span>免练级纯初始方案</span>
+                      <Sparkles
+                        className={`w-3 h-3 ${
+                          activeTab === 'baseOnly'
+                            ? 'text-[#ffe57f]'
+                            : 'text-zinc-400 group-hover:text-[#ffe57f]'
+                        }`}
+                      />
+                      <span>仅初始等级</span>
                       {hasCalculated && (
-                        <span className={`text-[9.5px] px-1 py-0 font-mono ${activeTab === 'baseOnly' ? 'bg-black text-white' : 'bg-white/10 text-zinc-300'}`}>
+                        <span
+                          className={`text-[9.5px] sm:text-[10px] px-1 sm:px-1.5 py-0.2 font-mono font-black ${
+                            activeTab === 'baseOnly'
+                              ? 'bg-black text-white shadow-[1px_1px_0_#000]'
+                              : 'bg-black/60 text-zinc-400 border border-white/10 group-hover:text-white'
+                          }`}
+                        >
                           {baseOnlyPaths.length}
                         </span>
                       )}
@@ -370,7 +398,7 @@ export function PathFinderModal({
                     <Info className="w-7 h-7 text-[#e60012] mx-auto" />
                     <p className="text-xs text-white font-black">
                       {activeTab === 'baseOnly'
-                        ? '未检索到【完全免练级】的直达方案'
+                        ? '未检索到【仅初始等级】的直达方案'
                         : '未搜索到可行合成路径'}
                     </p>
                     <p className="text-[11px] text-zinc-400 max-w-md mx-auto leading-relaxed">
@@ -412,7 +440,7 @@ export function PathFinderModal({
                               )}
                               {activeTab === 'baseOnly' && (
                                 <span className="text-[10px] font-bold bg-[#107c41] text-white px-1.5 py-0.5 p5-skew-l shadow-[1px_1px_0_#000]">
-                                  <span className="p5-unskew-l">★ 纯初始免练级</span>
+                                  <span className="p5-unskew-l">仅初始等级</span>
                                 </span>
                               )}
                             </div>
