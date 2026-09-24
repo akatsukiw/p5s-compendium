@@ -32,7 +32,7 @@ export function MaterialBadge({
           : 'px-2 py-0.5 gap-1.5'
       } ${
         isHighlighted
-          ? 'bg-[#151822] hover:bg-[#e60012] text-white border border-white/25 shadow-[1px_1px_0_#000]'
+          ? 'bg-[#151822] hover:bg-[#e60012] text-white border border-[#e60012]/40 shadow-[1px_1px_0_#000]'
           : 'bg-[#0e1017] hover:bg-[#e60012] text-white border border-white/10 hover:border-white/30'
       }`}
     >
@@ -56,13 +56,13 @@ export function MaterialBadge({
           </span>
         )}
 
-        {/* Persona Name: Compact 11px on mobile, full size on desktop */}
+        {/* Persona Name: Red text when highlighted per user request */}
         <span
           className={`tracking-tight inline-flex items-center ${
             compact ? 'text-[11px]' : 'text-xs sm:text-sm'
           } ${
             isHighlighted
-              ? 'text-white font-black'
+              ? 'text-[#e60012] font-black group-hover/mat:text-white'
               : 'font-bold text-zinc-300 group-hover/mat:text-white'
           }`}
         >
@@ -76,12 +76,12 @@ export function MaterialBadge({
               compact ? 'text-[9.5px] ml-0.5' : 'text-[10.5px] sm:text-xs ml-0.5'
             } ${
               isHighlighted
-                ? 'text-[#ffe57f]'
+                ? 'text-[#ffe57f] group-hover/mat:text-white'
                 : 'text-[#f6c344] group-hover/mat:text-[#fffb00]'
             }`}
             title={`合体要求 Lv${reqLvl} (初始原始等级 Lv${baseLvl})`}
           >
-            Lv{reqLvl}<span className="text-[7.5px] sm:text-[8.5px] font-bold text-[#ffe57f] ml-0.2">▲</span>
+            Lv{reqLvl}<span className="text-[7.5px] sm:text-[8.5px] font-bold text-[#ffe57f] group-hover/mat:text-white ml-0.2">▲</span>
           </span>
         ) : (
           <span
@@ -89,7 +89,7 @@ export function MaterialBadge({
               compact ? 'text-[9.5px] ml-0.5' : 'text-[10.5px] sm:text-xs ml-0.5'
             } ${
               isHighlighted
-                ? 'text-zinc-200'
+                ? 'text-zinc-400 group-hover/mat:text-white'
                 : 'text-zinc-500 group-hover/mat:text-white'
             }`}
           >
