@@ -16,9 +16,11 @@ import {
   Bookmark,
   GitMerge,
   Route,
+  HelpCircle,
 } from 'lucide-react';
 import type { MaterialItem, FusionRow } from './types';
 import { PathFinderModal } from './components/PathFinderModal';
+import { HelpModal } from './components/HelpModal';
 import { MaterialBadge } from './components/MaterialBadge';
 
 /**
@@ -50,6 +52,9 @@ export default function App() {
   const [isPathFinderOpen, setIsPathFinderOpen] = useState<boolean>(false);
   const [pathFinderFrom, setPathFinderFrom] = useState<string>('杰克灯笼');
   const [pathFinderTo, setPathFinderTo] = useState<string>('杰克霜精');
+
+  // Help & Changelog modal state
+  const [isHelpOpen, setIsHelpOpen] = useState<boolean>(false);
 
   const openPathFinder = (from?: string, to?: string) => {
     if (from) setPathFinderFrom(from);
@@ -212,28 +217,42 @@ export default function App() {
         <div className="max-w-7xl mx-auto px-3 sm:px-6 pt-3 pb-2.5 sm:py-3.5">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-4">
             
-            {/* Logo Badge & Full Title (Never squeezed on mobile) */}
-            <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-              <div className="bg-[#e60012] text-white font-p5-display text-base sm:text-2xl px-2.5 sm:px-3.5 py-0.5 sm:py-1 p5-skew-l shadow-[2px_2px_0_#000] sm:shadow-[3px_3px_0_#000] flex items-center justify-center shrink-0">
-                <span className="p5-unskew-l tracking-tighter">P5S</span>
-              </div>
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
-                  <h1 className="text-sm xs:text-base sm:text-2xl font-black italic tracking-tight sm:tracking-wider text-white uppercase truncate">
-                    Persona 5 <span className="text-[#e60012]">Strikers</span>
-                  </h1>
-                  <span className="bg-white text-black text-[10px] sm:text-xs font-black tracking-wider px-1.5 sm:px-2 py-0.5 p5-skew-l shadow-[1.5px_1.5px_0_#000] sm:shadow-[2px_2px_0_#000] shrink-0">
-                    <span className="p5-unskew-l">合体全书</span>
-                  </span>
+            {/* Logo Badge & Full Title + Mobile Help Button */}
+            <div className="flex items-center justify-between gap-2 min-w-0">
+              <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+                <div className="bg-[#e60012] text-white font-p5-display text-base sm:text-2xl px-2.5 sm:px-3.5 py-0.5 sm:py-1 p5-skew-l shadow-[2px_2px_0_#000] sm:shadow-[3px_3px_0_#000] flex items-center justify-center shrink-0">
+                  <span className="p5-unskew-l tracking-tighter">P5S</span>
                 </div>
-                <p className="text-[10px] sm:text-xs text-zinc-400 font-bold tracking-wide mt-0.5 truncate">
-                  女神异闻录5对决：幽灵先锋 · 合体配方资料库
-                </p>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                    <h1 className="text-sm xs:text-base sm:text-2xl font-black italic tracking-tight sm:tracking-wider text-white uppercase truncate">
+                      Persona 5 <span className="text-[#e60012]">Strikers</span>
+                    </h1>
+                    <span className="bg-white text-black text-[10px] sm:text-xs font-black tracking-wider px-1.5 sm:px-2 py-0.5 p5-skew-l shadow-[1.5px_1.5px_0_#000] sm:shadow-[2px_2px_0_#000] shrink-0">
+                      <span className="p5-unskew-l">合体全书</span>
+                    </span>
+                  </div>
+                  <p className="text-[10px] sm:text-xs text-zinc-400 font-bold tracking-wide mt-0.5 truncate">
+                    女神异闻录5对决：幽灵先锋 · 合体配方资料库
+                  </p>
+                </div>
               </div>
+
+              {/* Mobile Help Button */}
+              <button
+                type="button"
+                onClick={() => setIsHelpOpen(true)}
+                className="sm:hidden w-8 h-8 flex items-center justify-center bg-[#141622] hover:bg-[#e60012] text-zinc-300 hover:text-white border border-white/20 hover:border-white shadow-[1.5px_1.5px_0_#000] p5-skew-l transition-all cursor-pointer shrink-0 active:scale-95"
+                title="操作指南与更新日志"
+              >
+                <span className="p5-unskew-l flex items-center justify-center">
+                  <HelpCircle className="w-4 h-4 text-[#ffe57f]" />
+                </span>
+              </button>
             </div>
 
             {/* Header Action: Tactile Interactive Button (Full width on mobile below title, compact right-docked on desktop) */}
-            <div className="w-full sm:w-auto shrink-0">
+            <div className="w-full sm:w-auto shrink-0 flex items-center gap-2">
               <button
                 onClick={() => openPathFinder()}
                 className="w-full sm:w-auto relative bg-[#0d0e15] hover:bg-[#e60012] text-white border-2 border-[#e60012] hover:border-white shadow-[2px_2px_0_#000] sm:shadow-[3px_3px_0_#000] transition-all flex items-center justify-between sm:justify-start gap-2 px-3 sm:px-3.5 py-1.5 sm:py-2 p5-skew-l cursor-pointer active:translate-x-0.5 active:translate-y-0.5 active:scale-95 group shrink-0"
@@ -253,6 +272,19 @@ export default function App() {
                     <span>计算路线</span>
                     <span className="text-[8.5px]">➔</span>
                   </span>
+                </span>
+              </button>
+
+              {/* Desktop Help Button */}
+              <button
+                type="button"
+                onClick={() => setIsHelpOpen(true)}
+                className="hidden sm:flex items-center justify-center h-[38px] px-2.5 bg-[#141622] hover:bg-[#e60012] text-zinc-300 hover:text-white border-2 border-white/20 hover:border-white shadow-[2px_2px_0_#000] p5-skew-l transition-all cursor-pointer shrink-0 active:translate-x-0.5 active:translate-y-0.5 active:scale-95 group"
+                title="操作指南与更新日志"
+              >
+                <span className="p5-unskew-l flex items-center gap-1.5 text-xs font-black">
+                  <HelpCircle className="w-4 h-4 text-[#ffe57f] group-hover:text-white transition-colors" />
+                  <span>指南</span>
                 </span>
               </button>
             </div>
@@ -930,6 +962,13 @@ export default function App() {
           setIsPathFinderOpen(false);
           setInspectedPersona(name);
         }}
+      />
+
+      {/* USER INSTRUCTIONS & CHANGELOG MODAL */}
+      <HelpModal
+        isOpen={isHelpOpen}
+        onClose={() => setIsHelpOpen(false)}
+        onOpenPathFinder={() => openPathFinder()}
       />
 
       {/* FOOTER */}
